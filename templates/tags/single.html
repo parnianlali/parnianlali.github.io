@@ -4,14 +4,9 @@
 {{ super() }}
 {{- macros_seo::seo(config=config, title="#" ~ term.name, description="{{ term.page_count }} posts available in #{{ term.name }}") }}
 {% if taxonomy.feed %}
-  {%- for feed in config.feed_filenames -%}
-    {%- if feed is containing('atom') -%}
-    <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="{{ get_url(path=term.path ~ feed, trailing_slash=false) | safe }}" />
-    {%- endif -%}
-    {%- if feed is containing('rss') -%}
-    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{{ get_url(path=term.path ~ feed, trailing_slash=false) | safe }}" />
-    {%- endif -%}
-  {%- endfor -%}
+  <link rel="alternate" type="application/atom+xml" title="Atom Feed" href="{{ get_url(path=term.path ~ 'atom.xml', trailing_slash=false) | safe }}" />
+  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{{ get_url(path=term.path ~ 'rss.xml', trailing_slash=false) | safe }}" />
+
 {% endif %}
 {%- endblock head %}
 
@@ -55,13 +50,10 @@
   </nav>
   <div>
     {%- if taxonomy.feed -%}
-      {%- for feed in config.feed_filenames -%}
-        {%- if feed is containing('atom') -%}
-        <a href="{{ get_url(path=term.path ~ feed) | safe }}" style="display: inline-block; width: 2rem;" target="_blank">
-          {{ load_data(path="/assets/icons/rss.svg") | safe }}
-        </a>
-        {%- endif -%}
-      {%- endfor -%}
+      <a href="{{ get_url(path=term.path ~ 'atom.xml') | safe }}" style="display: inline-block; width: 2rem;" target="_blank">
+      {{ load_data(path="/assets/icons/rss.svg") | safe }}
+      </a>
+
     {%- endif -%}
   </div>
 </div>

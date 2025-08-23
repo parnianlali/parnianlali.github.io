@@ -9,6 +9,7 @@
 {%- block stylesheets %}
 {{ super() }}
 <link rel="stylesheet" href="{{ get_url(path='/homepage.css', trailing_slash=false, cachebust=true) }}" />
+<link rel="stylesheet" href="{{ get_url(path='/mytimeline.css', trailing_slash=false, cachebust=true) }}" />
 {%- endblock stylesheets %}
 
 {%- block content %}
@@ -34,50 +35,21 @@
   </div>
 </div>
 
-{# about me #}
-
-<div class="section" id="about-me">
+<div class="section" id="about-me" style="font-family: sans-serif; font-size: 20px;">
   <div class="container">
     {{ page_data.about_me | striptags | markdown(inline=false) | safe }}
   </div>
 </div>
 
-{# portfolio #}
+{# Top projects #}
 
 <div class="section-title" id="portfolio">
-  <h2>Portfolio</h2>
+  <h2>Top projects</h2>
 </div>
 
 <div class="section">
   <div class="container">
-    <h3>My top projects</h3>
-
-    <div class="top-projects">
-      {% for top_project in page_data.top_projects %}
-        <div class="card" style="background-color: {{ top_project.background }}; color: {{ top_project.color }};">
-          <div class="card-content">
-            {%- if top_project.icon is matching("\.svg$") %}
-            <img src="{{ top_project.icon }}" alt="{{ top_project.name }}"/>
-            {%- else %}
-            {% set project_img = resize_image(path=top_project.icon, width=110, height=110, op="fill", format="webp") %}
-            <img src="{{ project_img.url }}" alt="{{ top_project.name }}"/>
-            {%- endif %}
-            <h4>{{ top_project.name }}</h4>
-            <div>
-              {{ top_project.description | striptags | markdown(inline=false) | safe }}
-            </div>
-          </div>
-          <div class="card-actions">
-            <a href="{{ top_project.link }}" target="_blank" rel="noopener" class="button">
-              {{ top_project.calltoaction }}
-            </a>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-
-    <h3>Timeline</h3>
-
+    
     <div class="timeline">
       {% for entry in page_data.timeline | reverse %}
         <div class="timeline-element">
@@ -99,6 +71,11 @@
     </div>
   </div>
 </div>
+
+{% include "mytimeline.html" %}
+
+
+
 
 {% endblock content %}
 

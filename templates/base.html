@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="{{ get_url(path='/common.css', trailing_slash=false, cachebust=true) }}" />
     {%- endblock stylesheets %}
     {%- endblock head %}
+    {% if config.extra.favicon %}
+    <link rel="icon" type="image/png" href="{{ config.extra.favicon }}">
+    {% endif %}
+
   </head>
   <body>
     <header>
@@ -55,17 +59,9 @@
       </div>
       <div class="copyright">
         <div class="container">
-          <p class="copyright-text">&copy; 2017-{{ now() | date(format="%Y") }} Diogo Torres Correia</p>
-          <p>
-            <a
-              href="{{ config.extra.footer.source_code }}"
-              target="_blank"
-              rel="noopener"
-              data-umami-event="source-code-footer"
-            >
-              Website Source Code
-            </a>
+          <p class="copyright-text">&copy; 2025 Parnian Lali. Based on a template by <a href="https://github.com/diogotcorreia">Diogo Correia</a>.
           </p>
+          
         </div>
       </div>
     </footer>
