@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Parnian Lali - nextcloud</title>
+    <subtitle>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://parnianlali.github.io/tags/nextcloud/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://parnianlali.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-02-25T00:00:00+00:00</updated>
+    <id>https://parnianlali.github.io/tags/nextcloud/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Installing Collabora Online on Nextcloud with NixOS</title>
+        <published>2025-02-25T00:00:00+00:00</published>
+        <updated>2025-02-25T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/"/>
+        <id>https://parnianlali.github.io/blog/collabora-nextcloud-nixos/</id>
+        
+        <summary type="html">&lt;p&gt;In this post we will take a look at how to setup &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.collaboraonline.com&#x2F;&quot;&gt;Collabora Online&lt;&#x2F;a&gt; on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+</feed>

