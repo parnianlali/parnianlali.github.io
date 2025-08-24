@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="base" content="https://parnianlali.github.io" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Nunito&amp;display=swap" rel="stylesheet" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://parnianlali.github.io/common.css?h=5973d4556e23e9912129" />
+<link rel="stylesheet" href="https://parnianlali.github.io/blog.css?h=e3b0c44298fc1c149afb" /><meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;icooo.d9428ffc3f81bf19.png" type="image/png">
+  <title>Installing Collabora Online on Nextcloud with NixOS | Parnian Lali</title>
+  <meta property="og:title" content="Installing Collabora Online on Nextcloud with NixOS" />
+  <meta name="twitter:title" content="Installing Collabora Online on Nextcloud with NixOS" />
+  <meta name="copyright" content="Parnian Lali" />
+  <meta name="description" content="In this post we will take a look at how to setup Collabora Online on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings." />
+  <meta property="og:description" content="In this post we will take a look at how to setup Collabora Online on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings." />
+  <meta name="twitter:description" content="In this post we will take a look at how to setup Collabora Online on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings." />
+  <link rel="canonical" href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/" />
+  <meta property="og:url" content="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/" />
+  <meta name="twitter:url" content="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Parnian Lali" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2025-02-25" />
+    
+    <link rel="icon" type="image/png" href="&#x2F;assets&#x2F;images&#x2F;icooo.png">
+    
+
+  </head>
+  <body>
+    <header>
+<nav>
+  <div>
+    <button id="drawer-open" class="icon-button" aria-label="Open Navigation Drawer">
+      <svg focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+
+    </button>
+    <h1><a href="https://parnianlali.github.io/#top">Parnian Lali</a></h1>
+  </div>
+  <div>
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</nav>
+<dialog id="navbar-drawer">
+  <button id="drawer-close" class="icon-button" aria-label="Close Navigation Drawer">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+
+  </button>
+  <div class="navbar-drawer-links">
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</dialog>
+<div id="navbar-trigger" style="position: absolute; width: 1px; height: 1px; top: 100px; left: 0;"></div>
+    </header>
+    <main id="top">
+
+<div class="container post">
+  <a class="back" href=https://parnianlali.github.io/blog>Back to post list</a>
+  <article>
+    <header>
+      <h1>Installing Collabora Online on Nextcloud with NixOS</h1>
+      <span>2025-02-25 &middot; 10 minute read</span>
+      <p>
+        <a href="https://parnianlali.github.io/tags/nextcloud/">#nextcloud</a>
+        <a href="https://parnianlali.github.io/tags/nixos/">#nixos</a>
+        <a href="https://parnianlali.github.io/tags/sysadmin/">#sysadmin</a>
+      </p>
+    </header>
+    <div>
+      
+      
+      <div class="table-of-contents">
+        <ul>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/#how-it-works">How It Works</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/#deploy-collabora-with-nixos">Deploy Collabora with NixOS</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/#integrating-with-nextcloud">Integrating with Nextcloud</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/#problems">Problems</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/#conclusion">Conclusion</a>
+                
+            </li>
+          
+        </ul>
+      </div>
+      
+      <p>In this post we will take a look at how to setup <a rel="noopener nofollow noreferrer" target="_blank" href="https://www.collaboraonline.com/">Collabora Online</a> on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs/Sheets/Slides/Drawings.</p>
+<span id="continue-reading"></span>
+<p>With Collabora Online (which is based on LibreOffice), you can add support for documents,
+spreadsheets, slideshows and drawings to Nextcloud through the
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://apps.nextcloud.com/apps/richdocuments">Nextcloud Office app</a>, allowing those files to be opened directly
+in the browser.
+Furthermore, multiple users can edit the files simultaneously, just like you might be
+used to from Google’s offerings.</p>
+<p>Personally, while I don’t use an office suite that often (I prefer the comfort of neovim),
+when I have to I usually use Google’s, so this has been something I have wanted to de-Google
+for a while.
+Recently, and as part of NixOS 24.11, the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/issues/218878">highly</a> <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/issues/333457">requested</a>
+package and module for Collabora Online <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/pull/330708">has been merged</a> into nixpkgs, which makes
+it the perfect opportunity to finally install this in my Nextcloud instance.</p>
+<figure><a href=".&#x2F;multiplayer-collabora.png" class="img-fullscreen-link" target="_blank">
+    <img
+      src=".&#x2F;multiplayer-collabora.png"
+      srcset="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.7e19371451107794.webp 1900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.3ddf62bd43c4c43f.webp 1800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.0682cfb0809f49fa.webp 1700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.87efc4e6fa89a0dc.webp 1600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.1eab8812f61d7ec4.webp 1500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.4e44ca2a9b0a6de9.webp 1400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.8dbebb38d7534b54.webp 1300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.c3f99f776186787a.webp 1200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.9d0e6f85044418fd.webp 1100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.4913ed142b699bce.webp 1000w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.466dee3f99bda2e5.webp 900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.deb33c31ce504009.webp 800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.f8da91263c8a451c.webp 700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.26469eeba89b6a56.webp 600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.00992a588362bea1.webp 500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.ce97ada721228467.webp 400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.a9b51a319dc8de7e.webp 300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.322a65fc56a93970.webp 200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.7fcd8fc08d6ec187.webp 100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;multiplayer-collabora.dd679c91a57b739b.webp 1920w"
+      alt="Two users on a Collabora Online document, one authenticated and the other a guest, showcasing multi-user concurrency capabilities"
+      width="1920"
+      loading="lazy"
+      decoding="async"
+    />
+  </a><figcaption>Two users on a Collabora Online document, one authenticated and the other a guest, showcasing multi-user concurrency capabilities</figcaption></figure>
+<h2 id="how-it-works">How It Works</h2>
+<p>It was not immediately clear to me how Collabora and Nextcloud would integrate with each
+other, especially when taking security into account.
+There didn’t seem to exist any API keys or anything similar, and all tutorials I could find seemed
+to encourage exposing Collabora to the internet (or over a VPN, if you are using that for Nextcloud
+as well).
+This left me with a few questions: who stores the documents? Can someone use my Collabora instance
+without being authenticated with Nextcloud? How does authentication even work (remember, no API keys are
+shared between Nextcloud and Collabora)?</p>
+<p>After a lot of research and some source code reading, I figured out (mostly) how it works.
+Nextcloud and Collabora communicate using the <a rel="noopener nofollow noreferrer" target="_blank" href="https://en.wikipedia.org/wiki/Web_Application_Open_Platform_Interface">WOPI protocol</a>, first introduced by
+Microsoft.
+In this scenario, Nextcloud behaves as a WOPI Host, while Collabora behaves as a WOPI Client.
+This was first unintuitive to me, but it now makes sense: after all, Nextcloud is storing
+the files, while Collabora is just accessing them.
+When you open a file in Nextcloud, it gives you a token and tells you to go talk to Collabora.
+Your browser will then start the Collabora web application and give it the file URL and that
+token, which Collabora uses to fetch the file and display it on your browser.
+There are no API keys whatsoever because all authentication happens client-side. Neat!</p>
+<p>This behaviour is summarized in a <a rel="noopener nofollow noreferrer" target="_blank" href="https://help.nextcloud.com/t/collabora-integration-guide/151879">sequence diagram</a> in a post on the Nextcloud Forums,
+which could be worth a look if you are still confused.</p>
+<p>Regarding security considerations, Nextcloud and Collabora allow you to restrict
+which IP addresses and domains they talk to, respectively.
+This means it is possible to limit Nextcloud to only accept WOPI Clients with a given IP
+address, and Collabora to only open documents from a given WOPI Host, which resolves
+my security concerns.</p>
+<p>Finally, when it comes to storage, everything happens on Nextcloud.
+Nothing is stored on Collabora, so we don’t need to worry about backups or even persistence
+(in case you are using <a rel="noopener nofollow noreferrer" target="_blank" href="https://grahamc.com/blog/erase-your-darlings/">ephemeral root storage</a> like me).</p>
+<h2 id="deploy-collabora-with-nixos">Deploy Collabora with NixOS</h2>
+<p>Given that a module now exists, it is pretty straightforward to deploy Collabora on
+a NixOS system:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{...}: {
+</span><span>  </span><span style="color:#bb80b3;">services</span><span>.</span><span style="color:#bb80b3;">collabora-online </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#bb80b3;">enable </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#bb80b3;">port </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">9980</span><span style="color:#5fb3b3;">; </span><span style="color:#5f6364;"># default
+</span><span>    </span><span style="color:#bb80b3;">settings </span><span style="color:#5fb3b3;">= {
+</span><span>      </span><span style="color:#5f6364;"># Rely on reverse proxy for SSL
+</span><span>      </span><span style="color:#bb80b3;">ssl </span><span style="color:#5fb3b3;">= {
+</span><span>        </span><span style="color:#bb80b3;">enable </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">;
+</span><span>        </span><span style="color:#bb80b3;">termination </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>      </span><span style="color:#5f6364;"># Listen on loopback interface only, and accept requests from ::1
+</span><span>      </span><span style="color:#bb80b3;">net </span><span style="color:#5fb3b3;">= {
+</span><span>        </span><span style="color:#bb80b3;">listen </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">loopback</span><span style="color:#5fb3b3;">&quot;;
+</span><span>        </span><span style="color:#bb80b3;">post_allow</span><span>.</span><span style="color:#bb80b3;">host </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">::1</span><span style="color:#5fb3b3;">&quot;];
+</span><span>      </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>      </span><span style="color:#5f6364;"># Restrict loading documents from WOPI Host nextcloud.example.com
+</span><span>      </span><span style="color:#bb80b3;">storage</span><span>.</span><span style="color:#bb80b3;">wopi </span><span style="color:#5fb3b3;">= {
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">@allow</span><span style="color:#5fb3b3;">&quot; = </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>        </span><span style="color:#bb80b3;">host </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">nextcloud.example.com</span><span style="color:#5fb3b3;">&quot;];
+</span><span>      </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>      </span><span style="color:#5f6364;"># Set FQDN of server
+</span><span>      </span><span style="color:#bb80b3;">server_name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">collabora.example.com</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>We set some settings that can depend on your setup, but here’s the reasoning behind
+them:</p>
+<ul>
+<li>since we’ll be using a reverse proxy in front of Collabora, we don’t need it to
+handle SSL connections, so we disable it with <code>ssl.enable = false</code>, but tell it
+other users/apps are still supposed to use SSL when connecting to it with <code>ssl.termination = true</code>;</li>
+<li>likewise, since connections will only be happening through the reverse proxy and
+locally (Nextcloud), Collabora only needs to listen on localhost;</li>
+<li>as previously mentioned, we set <code>storage.wopi.host</code> to restrict Collabora to only
+open documents from our Nextcloud instance;</li>
+<li>we set <code>server_name</code> so that Collabora always uses it in the URLs it responds with,
+which would otherwise be derived from the <code>Host</code> HTTP header.
+This is needed because we will make Nextcloud use localhost to talk to Collabora,
+which then forwards some URLs to the user.
+Without setting this option, those URLs would be <code>https://[::1]:9980/...</code>, which the
+user wouldn’t be able to access.</li>
+</ul>
+<p>For all other settings, we can use the defaults (the NixOS module automatically adds them),
+which includes an option to keep the admin console disabled.</p>
+<p>Then, we must setup a reverse proxy, to forward all requests to port 9980, including WebSockets.
+This will depend on your setup, but most people are using NGINX, so here is an example config:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{</span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">, ...}: {
+</span><span>  </span><span style="color:#bb80b3;">services</span><span>.</span><span style="color:#bb80b3;">nginx </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#bb80b3;">enable </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5f6364;"># I recommend these, but it&#39;s up to you
+</span><span>    </span><span style="color:#bb80b3;">recommendedProxySettings </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#bb80b3;">recommendedTlsSettings </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">virtualHosts</span><span>.</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">collabora.example.com</span><span style="color:#5fb3b3;">&quot; =  {
+</span><span>      </span><span style="color:#bb80b3;">enableACME </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#bb80b3;">forceSSL </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#bb80b3;">locations</span><span>.</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">/</span><span style="color:#5fb3b3;">&quot; = {
+</span><span>        </span><span style="color:#bb80b3;">proxyPass </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">http://[::1]:</span><span style="color:#5fb3b3;">${</span><span style="color:#6699cc;">toString </span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">services</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">collabora-online</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">port</span><span style="color:#5fb3b3;">}&quot;;
+</span><span>        </span><span style="color:#bb80b3;">proxyWebsockets </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">; </span><span style="color:#5f6364;"># collabora uses websockets
+</span><span>      </span><span style="color:#5fb3b3;">};
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>After rebuilding your configuration, you can visit <code>https://collabora.example.com/hosting/discovery</code>
+(which should show an XML document) to ensure Collabora is working fine.
+If so, congratulations, you are ready to move into the next step!</p>
+<h2 id="integrating-with-nextcloud">Integrating with Nextcloud</h2>
+<p>Integrating this with Nextcloud is also pretty straightforward, but it’s a bit more
+cumbersome to set the configuration options declaratively.</p>
+<p>Firstly, we need to install the <a rel="noopener nofollow noreferrer" target="_blank" href="https://apps.nextcloud.com/apps/richdocuments">Nextcloud Office</a> app, also
+known as <code>richdocuments</code>.
+If you can’t be bothered to do this declaratively, it is as simple as going into Nextcloud,
+opening the Apps page, going to the “Office &amp; text” category and clicking the “Download and enable”
+button.
+But if you are here, you probably want to use Nix to do this, and fortunately that’s not
+a lot of work since it is packaged:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{...}: {
+</span><span>  </span><span style="color:#bb80b3;">services</span><span>.</span><span style="color:#bb80b3;">nextcloud </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#5f6364;"># Hopefully you have configured Nextcloud already :)
+</span><span>    </span><span style="color:#5f6364;"># ...
+</span><span>
+</span><span>    </span><span style="color:#5f6364;"># If this is your first time adding an app to `extraApps`, you might want to
+</span><span>    </span><span style="color:#5f6364;"># keep the stateful app store enabled.
+</span><span>    </span><span style="color:#bb80b3;">appstoreEnable </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">extraAppsEnable </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#bb80b3;">extraApps </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">with </span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">services</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nextcloud</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">package</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">packages</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">apps</span><span>; </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#c594c5;">inherit
+</span><span>        </span><span style="color:#5f6364;"># ... other apps
+</span><span>        </span><span style="color:#bb80b3;">richdocuments </span><span style="color:#5f6364;"># Collabora Online for Nextcloud - https://apps.nextcloud.com/apps/richdocuments
+</span><span>        </span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>This is all that takes to install the app on Nextcloud, but now we need to configure it.
+Again, this is entirely possible to do through the UI (under Administration settings -&gt; Office),
+but I prefer to do this declaratively.</p>
+<p>The underlying options seem to be poorly documented (or at least I could not find them),
+so I made a trip to the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/nextcloud/richdocuments/blob/v8.6.1/lib/AppConfig.php">app’s source code</a> to find them.
+Here are the relevant ones:</p>
+<ul>
+<li><code>wopi_url</code>: URL that Nextcloud will use to connect to Collabora internally;</li>
+<li><code>public_wopi_url</code>: URL that the browser will use to connect to Collabora (must be publicly-accessible);</li>
+<li><code>wopi_allowlist</code>: comma-separated list of IP addresses of WOPI clients to accept connections from.</li>
+</ul>
+<p>It could be relevant to note that <code>public_wopi_url</code> cannot be set through the UI
+(at least that I could find), so you just have to use the public URL for <code>wopi_url</code>,
+if you are going that route.</p>
+<p>Unfortunately, these options are stored in the database, so we must set them up with <code>occ</code>.
+For that reason, I’ve written a systemd unit that runs when Nextcloud and Collabora start
+and sets these options:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{</span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">, ...}: {
+</span><span>  </span><span style="color:#bb80b3;">systemd</span><span>.</span><span style="color:#bb80b3;">services</span><span>.</span><span style="color:#bb80b3;">nextcloud-config-collabora </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">let
+</span><span>    </span><span style="color:#c594c5;">inherit </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">services</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nextcloud</span><span style="color:#5fb3b3;">) </span><span style="color:#bb80b3;">occ</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">wopi_url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">http://[::1]:</span><span style="color:#5fb3b3;">${</span><span style="color:#6699cc;">toString </span><span style="color:#f99157;">config</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">services</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">collabora-online</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">port</span><span style="color:#5fb3b3;">}&quot;;
+</span><span>    </span><span style="color:#bb80b3;">public_wopi_url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://collabora.example.com</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">wopi_allowlist </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">lib</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">concatStringsSep </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">,</span><span style="color:#5fb3b3;">&quot; [
+</span><span>      </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">127.0.0.1</span><span style="color:#5fb3b3;">&quot;
+</span><span>      </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">::1</span><span style="color:#5fb3b3;">&quot;
+</span><span>    </span><span style="color:#5fb3b3;">];
+</span><span>  </span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">wantedBy </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">multi-user.target</span><span style="color:#5fb3b3;">&quot;];
+</span><span>    </span><span style="color:#bb80b3;">after </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">nextcloud-setup.service</span><span style="color:#5fb3b3;">&quot; &quot;</span><span style="color:#99c794;">coolwsd.service</span><span style="color:#5fb3b3;">&quot;];
+</span><span>    </span><span style="color:#bb80b3;">requires </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">coolwsd.service</span><span style="color:#5fb3b3;">&quot;];
+</span><span>    </span><span style="color:#bb80b3;">script </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">occ</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/nextcloud-occ config:app:set richdocuments wopi_url --value </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">lib</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">escapeShellArg wopi_url</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">occ</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/nextcloud-occ config:app:set richdocuments public_wopi_url --value </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">lib</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">escapeShellArg public_wopi_url</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">occ</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/nextcloud-occ config:app:set richdocuments wopi_allowlist --value </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">lib</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">escapeShellArg wopi_allowlist</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">occ</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/nextcloud-occ richdocuments:setup
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#bb80b3;">serviceConfig </span><span style="color:#5fb3b3;">= {
+</span><span>      </span><span style="color:#bb80b3;">Type </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">oneshot</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Another thing to note is that if you are deploying this on a machine with a public IP
+address (e.g., a VPS), you can use <code>127.0.0.1</code> and <code>::1</code> for <code>wopi_allowlist</code>,
+but that is not the case if you are behind NAT (which is my case).
+I could not find a way have Collabora connect through localhost to Nextcloud because
+Nextcloud is not listening on any port but instead on a Unix socket that is then behind
+a reverse proxy, so even tough the <code>wopi_callback_url</code> option exists, I could not use it.
+Additionally, I did not want to hardcode my public IP address in the config
+because it could change in the future (it’s not a static IP address).</p>
+<p>For that reason, the easiest solution seems to be to edit <code>/etc/hosts</code> to force
+Collabora to resolve <code>nextcloud.diogotc.com</code> to localhost:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{...}: {
+</span><span>  </span><span style="color:#bb80b3;">networking</span><span>.</span><span style="color:#bb80b3;">hosts </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">127.0.0.1</span><span style="color:#5fb3b3;">&quot; = [&quot;</span><span style="color:#99c794;">nextcloud.example.com</span><span style="color:#5fb3b3;">&quot; &quot;</span><span style="color:#99c794;">collabora.example.com</span><span style="color:#5fb3b3;">&quot;];
+</span><span>    </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">::1</span><span style="color:#5fb3b3;">&quot; = [&quot;</span><span style="color:#99c794;">nextcloud.example.com</span><span style="color:#5fb3b3;">&quot; &quot;</span><span style="color:#99c794;">collabora.example.com</span><span style="color:#5fb3b3;">&quot;];
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>With this, we can now keep the aforementioned IP addresses for <code>wopi_allowlist</code>.</p>
+<p>After this is done and another rebuild, you should see a green checkmark in the
+Administration settings -&gt; Office page:</p>
+<figure><a href=".&#x2F;richdocuments-success.png" class="img-fullscreen-link" target="_blank">
+    <img
+      src=".&#x2F;richdocuments-success.png"
+      srcset="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.61c418ae745ed361.webp 800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.ebcbb141cb84c5d3.webp 700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.d310f23582e9d994.webp 600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.2c892d76974164a8.webp 500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.6e3ff2305a5a078a.webp 400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.f789d02a6b0be892.webp 300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.9352dbfac164b48a.webp 200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.f1196867b8bb9d5d.webp 100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;richdocuments-success.8cbc899d91d2e373.webp 879w"
+      alt="Nextcloud settings showing that Collabora Online is reachable from Nextcloud"
+      width="879"
+      loading="lazy"
+      decoding="async"
+    />
+  </a><figcaption>Nextcloud settings showing that Collabora Online is reachable from Nextcloud</figcaption></figure>
+<p>If needed, you can also take a look at the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/diogotcorreia/dotfiles/commit/ef70da6198bfb1a432bb48371dba6f0ba0eb061b">commit</a> where I deployed
+this on my server.</p>
+<h2 id="problems">Problems</h2>
+<p>Almost everything I tested seems to be working perfectly, which is awesome!
+But unfortunately, a major feature seems to be broken at the moment: PDF export.
+This seems to be a packaging issue and other people in the nixpkgs community
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/issues/218878#issuecomment-2471223335">have pointed out that it is for them broken as well</a>.</p>
+<p>If you already have LibreOffice installed locally, it’s not a critical issue since you
+can just download the file and export it there, but it’s rather annoying and
+will hopefully be fixed soon.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this post we’ve taken a look into how to setup Collabora Online in your
+Nextcloud instance using NixOS, which, thanks to the amazing work of nixpkgs
+maintainers, is very straightforward.
+I also hope you’ve learnt a bit more about how WOPI works instead of it being
+just ✨ magic ✨.</p>
+<hr />
+<p><strong>Update 2025-05-21:</strong> The codeblock for the <code>nextcloud-config-collabora</code> systemd unit
+has been updated to work on NixOS 25.05 given the credential handling changes.
+The only change was making the unit run as root instead of as the nextcloud user.</p>
+
+    </div>
+  </article>
+  <div></div>
+  <div class="disclaimer">
+    This post has been written by humans only, unless otherwise explicitly stated.<br>
+    Opinions are solely my own and do not reflect those of any employer, past, present, or future.<br>
+    Content licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.
+  </div>
+</div>
+
+
+    </main>
+    <footer>
+      <div class="container footer-sections">
+        <div class="footer-section">
+          <h2>Contact me</h2>
+          <ul>
+            
+              <li>
+                <span class="social-label">Email: </span>
+                <a
+                  href="mailto:parnian.lalii@gmail.com"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="mail-social-footer"
+                >
+                  parnian.lalii@gmail.com
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">Linkedin: </span>
+                <a
+                  href="www.linkedin.com&#x2F;in&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="Linkedin-social-footer"
+                >
+                  parnian lali
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">github: </span>
+                <a
+                  href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="github-social-footer"
+                >
+                  parnianlali
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h2>Site map</h2>
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;parnianlali.github.io">Home</a></li>
+            <li><a href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">CV</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <div class="container">
+          <p class="copyright-text">&copy; 2025 Parnian Lali. Based on a template by <a href="https://github.com/diogotcorreia">Diogo Correia</a>.
+          </p>
+          
+        </div>
+      </div>
+    </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 
+    const navbar = document.querySelector("nav");
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].boundingClientRect.y < 0) {
+        navbar.classList.add("navbar--sticky");
+      } else {
+        navbar.classList.remove("navbar--sticky");
+      }
+    });
+    observer.observe(document.querySelector("#navbar-trigger"));
+
+    const drawer = document.getElementById("navbar-drawer");
+    const drawerOpenBtn = document.getElementById("drawer-open");
+    const drawerCloseBtn = document.getElementById("drawer-close");
+
+    drawerOpenBtn.addEventListener("click", () => {
+      drawer.showModal();
+    });
+    document.querySelectorAll("#drawer-close, #navbar-drawer a").forEach(element => {
+      element.addEventListener("click", () => {
+        drawer.close();
+      });
+    });
+  });
+</script>
+    <script
+      async
+      defer
+      data-website-id="25c8aedf-a960-4b55-8c70-7bc4b2ad587b"
+      src="https://umami.diogotc.com/hellothere.js"
+      data-domains="diogotc.com,www.diogotc.com"
+    ></script>
+
+  </body>
+</html>

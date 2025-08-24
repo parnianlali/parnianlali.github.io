@@ -1,0 +1,33 @@
+
+<svg width="400" height="280" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
+  <!-- Input Layer (Blue) -->
+  <circle cx="30" cy="30" r="10" fill="#4A90E2"/>
+  <circle cx="30" cy="70" r="10" fill="#4A90E2"/>
+  <circle cx="30" cy="110" r="10" fill="#4A90E2"/>
+
+  <!-- Hidden Layer (Purple) -->
+  <circle cx="100" cy="30" r="10" fill="#9B59B6"/>
+  <circle cx="100" cy="70" r="10" fill="#9B59B6"/>
+  <circle cx="100" cy="110" r="10" fill="#9B59B6"/>
+
+  <!-- Output Layer (Orange) -->
+  <circle cx="170" cy="70" r="10" fill="#F39C12"/>
+
+  <!-- Edges Input -> Hidden (light gray) -->
+  <line x1="30" y1="30" x2="100" y2="30" stroke="#cccccc"/>
+  <line x1="30" y1="30" x2="100" y2="70" stroke="#cccccc"/>
+  <line x1="30" y1="30" x2="100" y2="110" stroke="#cccccc"/>
+
+  <line x1="30" y1="70" x2="100" y2="30" stroke="#cccccc"/>
+  <line x1="30" y1="70" x2="100" y2="70" stroke="#cccccc"/>
+  <line x1="30" y1="70" x2="100" y2="110" stroke="#cccccc"/>
+
+  <line x1="30" y1="110" x2="100" y2="30" stroke="#cccccc"/>
+  <line x1="30" y1="110" x2="100" y2="70" stroke="#cccccc"/>
+  <line x1="30" y1="110" x2="100" y2="110" stroke="#cccccc"/>
+
+  <!-- Edges Hidden -> Output (light gray) -->
+  <line x1="100" y1="30" x2="170" y2="70" stroke="#cccccc"/>
+  <line x1="100" y1="70" x2="170" y2="70" stroke="#cccccc"/>
+  <line x1="100" y1="110" x2="170" y2="70" stroke="#cccccc"/>
+</svg>
