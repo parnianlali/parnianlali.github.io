@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Parnian Lali - misc</title>
+      <link>https://parnianlali.github.io</link>
+      <description>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://parnianlali.github.io/tags/misc/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Tue, 12 Dec 2023 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Welcome to my blog!</title>
+          <pubDate>Tue, 12 Dec 2023 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/hello-world/</link>
+          <guid>https://parnianlali.github.io/blog/hello-world/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/hello-world/">&lt;p&gt;Hello world, welcome to my little corner of the internet!&lt;br &#x2F;&gt;
+This post marks the beginning of my blogging journey.
+You might be thinking: what will this blog be about?&lt;&#x2F;p&gt;</description>
+      </item>
+    </channel>
+</rss>

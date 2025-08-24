@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Parnian Lali - golang</title>
+      <link>https://parnianlali.github.io</link>
+      <description>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://parnianlali.github.io/tags/golang/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Sat, 04 May 2024 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>openECSC 2024 Round 2 Write-up: GoSweeper</title>
+          <pubDate>Sat, 04 May 2024 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/</link>
+          <guid>https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/">&lt;p&gt;This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to.&lt;&#x2F;p&gt;</description>
+      </item>
+    </channel>
+</rss>

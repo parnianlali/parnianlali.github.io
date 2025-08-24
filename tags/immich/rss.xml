@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Parnian Lali - immich</title>
+      <link>https://parnianlali.github.io</link>
+      <description>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://parnianlali.github.io/tags/immich/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Mon, 30 Dec 2024 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Migrating Immich from Docker to NixOS</title>
+          <pubDate>Mon, 30 Dec 2024 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/immich-docker-to-nixos/</link>
+          <guid>https://parnianlali.github.io/blog/immich-docker-to-nixos/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/immich-docker-to-nixos/">&lt;p&gt;This is a quick post on how I migrated my Immich deployment from
+Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;</description>
+      </item>
+    </channel>
+</rss>

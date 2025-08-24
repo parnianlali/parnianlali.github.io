@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Parnian Lali - ctf-writeup</title>
+      <link>https://parnianlali.github.io</link>
+      <description>Hey, I&#x27;m Parnian - AI developer, researcher and I have a great passion for learning new things.</description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://parnianlali.github.io/tags/ctf-writeup/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Wed, 12 Mar 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>KalmarCTF 2025 Write-up: nix-build as a service</title>
+          <pubDate>Wed, 12 Mar 2025 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/</link>
+          <guid>https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/kalmarctf-writeup-nix-build-as-a-service/">&lt;p&gt;This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
+a sequel to last year’s &lt;a href=&quot;&#x2F;blog&#x2F;kalmarctf-writeup-reproducible-pwning&quot;&gt;“Reproducible Pwning”&lt;&#x2F;a&gt; challenge.
+To get to the solution, we will take a peek behind the curtain into how Nix derivations
+work internally.&lt;&#x2F;p&gt;</description>
+      </item>
+      <item>
+          <title>openECSC 2024 Round 2 Write-up: GoSweeper</title>
+          <pubDate>Sat, 04 May 2024 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/</link>
+          <guid>https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/openecsc-round2-writeup-gosweeper/">&lt;p&gt;This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
+This challenge gives us a glimpse of side channels on the web, which allow
+us to infer information which we otherwise would not have access to.&lt;&#x2F;p&gt;</description>
+      </item>
+      <item>
+          <title>KalmarCTF 2024 Write-up: Reproducible Pwning</title>
+          <pubDate>Tue, 19 Mar 2024 00:00:00 +0000</pubDate>
+          <author>Diogo Correia</author>
+          <link>https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/</link>
+          <guid>https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/</guid>
+          <description xml:base="https://parnianlali.github.io/blog/kalmarctf-writeup-reproducible-pwning/">&lt;p&gt;This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
+This challenge takes us through the inner workings of Nix and a very interesting
+privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;</description>
+      </item>
+    </channel>
+</rss>
