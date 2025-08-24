@@ -11,15 +11,23 @@
   text-align: center;
 
   /* TODO container styles */
-  .profile-picture {
-    width: 100px;
-    height: 100px;
-    border-radius: 100px;
-  }
+.profile-picture {
+  width: 160px;        /* slightly smaller than before */
+  height: 160px;       /* same as width for a perfect circle */
+  border-radius: 50%;  /* keeps it circular */
+  object-fit: cover;   /* prevents stretching */
+  margin-top: 25px;    /* moves it slightly downward */
+  display: block;      /* ensures margin-top works */
+  margin-left: auto;   /* centers horizontally */
+  margin-right: auto;  /* centers horizontally */
+}
+
+
+
 
   h1 {
     font-family: "Nunito", "Roboto", "Helvetica", "Arial", sans-serif;
-    font-size: 4rem;
+    font-size: 3rem;
     font-weight: 300;
     margin-top: 30px;
     margin-bottom: 10px;
@@ -31,7 +39,7 @@
   }
 
   .socials {
-    margin-top: 32px;
+    margin-top: 10px;
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
