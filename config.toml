@@ -82,4 +82,4 @@ name = "Home"
 path = "/"
 [[extra.links]]
 name = "CV"
-path = "https://github.com/parnianlali/CV"
+path = "https://parnianlali.github.io/cv/"
