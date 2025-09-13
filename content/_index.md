@@ -1,4 +1,5 @@
 +++
+
 [extra]
 profile_picture = "/assets/images/profilee2.jpg"
 name = "Parnian La'li"
@@ -61,6 +62,7 @@ link = "https://www.kaggle.com/parnianlali"
 
 [[extra.timeline]]
 title = "Bachlor's thesis: machine learning in wearable sensors"
+description = "Personal website of Parnian Lali"
 subtitle = "Supervisor: Dr. Peyman sahebsara"
 date = ""
 icon = "/assets/icons/python.svg"
