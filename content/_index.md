@@ -1,10 +1,17 @@
 +++
 
+title = "Parnian Lali"
+description = "Official personal website of Parnian Lali, AI Researcher and Professional Violinist"
+
 [extra]
 profile_picture = "/assets/images/profilee2.jpg"
 name = "Parnian La'li"
 subtitle = "AI Researcher and Professional Violinist "
 about_me = """
+
+# Parnian Lali
+AI Researcher and Professional Violinist
+
 **Bio**
 
 I'm an Artificial Intelligence programmer and researcher graduated from [Isfahan University of Technology (IUT)](https://www.iut.ac.ir/en) in Physics and Electrical Engineering.
