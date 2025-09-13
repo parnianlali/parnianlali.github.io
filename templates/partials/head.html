@@ -1,6 +1,23 @@
 <meta charset="utf-8" />
 <meta http-equiv="x-ua-compatible" content="ie=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>{% if page.title %}{{ page.title }} - {% endif %}{{ config.title }}</title>
+<meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ config.description }}{% endif %}" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ current_url | safe }}" />
+<meta property="og:title" content="{% if page.title %}{{ page.title }} - {% endif %}{{ config.title }}" />
+<meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ config.description }}{% endif %}" />
+<meta property="og:image" content="{{ config.base_url | safe }}{{ config.extra.favicon }}" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="{% if page.title %}{{ page.title }} - {% endif %}{{ config.title }}" />
+<meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% else %}{{ config.description }}{% endif %}" />
+<meta name="twitter:image" content="{{ config.base_url | safe }}{{ config.extra.favicon }}" />
+
 <meta name="base" content="{{ config.base_url | safe }}" />
 <meta name="HandheldFriendly" content="True" />
 <meta name="mobile-web-app-capable" content="yes" />
