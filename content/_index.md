@@ -9,8 +9,7 @@ name = "Parnian La'li"
 subtitle = "AI Researcher and Professional Violinist "
 about_me = """
 
-# Parnian Lali
-AI Researcher and Professional Violinist
+
 
 **Bio**
 
