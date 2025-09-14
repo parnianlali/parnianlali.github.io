@@ -23,13 +23,7 @@ $two-columns-breakpoint: 1170px;
     position: absolute;
     top: 0;
     width: 4px;
-
-    left: 18px;
-
-    @media only screen and (min-width: $two-columns-breakpoint) {
-      left: 50%;
-      margin-left: -2px;
-    }
+    left: 18px; // Keep left position for both mobile and desktop
   }
 
   &-element {
@@ -58,8 +52,8 @@ $two-columns-breakpoint: 1170px;
       @media only screen and (min-width: $two-columns-breakpoint) {
         width: 60px;
         height: 60px;
-        left: 50%;
-        margin-left: -30px;
+        left: -10px; // Position icon on the left line
+        margin-left: 0;
       }
 
       svg {
@@ -90,9 +84,10 @@ $two-columns-breakpoint: 1170px;
       }
 
       @media only screen and (min-width: $two-columns-breakpoint) {
-        margin-left: 0;
+        margin-left: 80px; // Add left margin to push content right
         padding: 1.5em;
-        width: 44%;
+        width: calc(100% - 120px); // Adjust width to account for left margin
+        float: none; // Remove float to keep all content on right
       }
 
       h4 {
@@ -119,11 +114,12 @@ $two-columns-breakpoint: 1170px;
       }
     }
 
-    @media only screen and (min-width: $two-columns-breakpoint) {
-      &:nth-child(2n) &-content {
-        float: right;
-      }
-    }
+    // Remove the alternating layout - all content stays on right
+    // @media only screen and (min-width: $two-columns-breakpoint) {
+    //   &:nth-child(2n) &-content {
+    //     float: right;
+    //   }
+    // }
 
     &-date {
       color: #333;
@@ -136,19 +132,21 @@ $two-columns-breakpoint: 1170px;
 
       @media only screen and (min-width: $two-columns-breakpoint) {
         font-size: 1rem;
-        left: 124%;
+        left: 100%; // Position date to the right of content
         position: absolute;
         top: 6px;
         width: 100%;
+        margin-left: 20px; // Add some spacing from content
       }
     }
 
-    @media only screen and (min-width: $two-columns-breakpoint) {
-      &:nth-child(2n) &-date {
-        left: auto;
-        right: 124%;
-        text-align: right;
-      }
-    }
+    // Remove alternating date positioning - all dates stay on right
+    // @media only screen and (min-width: $two-columns-breakpoint) {
+    //   &:nth-child(2n) &-date {
+    //     left: auto;
+    //     right: 124%;
+    //     text-align: right;
+    //   }
+    // }
   }
 }
