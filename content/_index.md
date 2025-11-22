@@ -6,14 +6,14 @@ description = "Official personal website of Parnian Lali, AI Researcher and Prof
 [extra]
 profile_picture = "/assets/images/profilee2.jpg"
 name = "Parnian La'li"
-subtitle = "AI Researcher and Professional Violinist "
+subtitle = "Student and Professional Violinist "
 about_me = """
 
 
 
 **Bio**
 
-I'm an Artificial Intelligence programmer and researcher graduated from [Isfahan University of Technology (IUT)](https://www.iut.ac.ir/en) in Physics and Electrical Engineering.
+I'm an Artificial intelligence and research enthusiast, and graduated from [Isfahan University of Technology (IUT)](https://www.iut.ac.ir/en) in Physics and Electrical Engineering.
 
 during my bachlor thesis I became familier with machine learning and then I found my interest
 more and more on AI fields and in this regard studying physics has given me a unique perspective to better illuminate the subtle insights of Electrical and AI.
@@ -87,7 +87,7 @@ icon = "/assets/icons/artificial_neural_network_icon_large.svg"
 background = "#3776AB"
 foreground = "#fff"
 content = """
-In this project, I explore agent interactions within mean‑field game theory which include a large number of agents. The AI algorithms are based on reinforcement learning, presenting substantial complexities across various game scenarios. This project is still ongoing.
+This project investigates agent interactions in mean-field game theory, where large populations of agents engage in complex, coupled decision-making. Using reinforcement-learning methods, It study cooperation under a centralized-training and decentralized-execution (CTDE) framework applied to a network of states. The project is still ongoing.
 """
 
 
