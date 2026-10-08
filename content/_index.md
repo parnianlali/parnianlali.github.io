@@ -13,13 +13,13 @@ about_me = """
 
 **Bio**
 
-I'm an Artificial intelligence and research enthusiast, and graduated from [Isfahan University of Technology (IUT)](https://www.iut.ac.ir/en) in Physics and Electrical Engineering.
+I’m a student and researcher working at the intersection of artificial intelligence and other interdisciplinary fields. I’m currently pursuing an M.Sc. and have completed a bachelor in physics with a minor in Electrical Engineering from [Isfahan University of Technology (IUT)](https://www.iut.ac.ir/en). I’m particularly interested in problems where ideas from different fields come together to provide new ways of understanding complex systems.
 
-during my bachlor thesis I became familier with machine learning and then I found my interest
-more and more on AI fields and in this regard studying physics has given me a unique perspective to better illuminate the subtle insights of Electrical and AI.
+Outside of academia, I’m a professional violinist and a member of a classical symphony orchestra, where I perform Classical music greats. Music has always been an important part of my life, and I enjoy the combination of individual practice and collaboration that playing in an orchestra brings.
 
-Since graduating I’ve focused on improving my computer science and AI skills, particularly in Reinforcement Learning, by completing several courses and working on projects that aim to contribute meaningfully to the field. 
+In my free time, I enjoy being in nature, hiking, and climbing mountains.
 
+If you’d like to know more, have any questions, or just want to say hi, feel free to reach out ;)
 """
 ###########
 # SOCIALS #
@@ -55,6 +55,11 @@ name = "kaggle"
 icon = "/assets/icons/kaa.svg"
 label = "kaggle"
 link = "https://www.kaggle.com/parnianlali"
+[[extra.socials]]
+name = "goodreads"
+icon = "/assets/icons/goodreads.svg"
+label = "goodreads"
+link = "https://www.goodreads.com/user/show/195546310-parnian-la-li"
 
 
 ############
@@ -72,7 +77,7 @@ description = "Personal website of Parnian Lali"
 subtitle = "Supervisor: Dr. Peyman sahebsara"
 date = ""
 icon = "/assets/icons/python.svg"
-background = "#007396"
+background = "#5d1467"
 foreground = "#fff"
 content = """
 In this project, I explored wearable technologies and various types of sensors, with a special focus on fiber optic sensors, which have emerged as a powerful force in the wearable tech field. I then outlined the fundamental concepts and steps for implementing machine learning in wearable sensors, reviewed existing research in this area, and proposed solutions to address the challenges encountered.
@@ -80,15 +85,25 @@ In this project, I explored wearable technologies and various types of sensors, 
 """
 
 [[extra.timeline]]
-title = "multi-agents Reinforcement learning (MARL)"
+title = "Auditing Credit Assignment in Cooperative Multi-Agent RL (Independent Research)"
 subtitle = "With initial guidance from Dr. Farhad Fazileh"
 date = ""
 icon = "/assets/icons/artificial_neural_network_icon_large.svg"
-background = "#3776AB"
+background = "#5d1467"
 foreground = "#fff"
 content = """
-This project investigates agent interactions in mean-field game theory, where large populations of agents engage in complex, coupled decision-making. Using reinforcement-learning methods, It study cooperation under a centralized-training and decentralized-execution (CTDE) framework applied to a network of states. The project is still ongoing.
+This project asks whether credit assignment methods in cooperative multi-agent reinforcement learning actually assign correct credit, rather than just achieving high task return. In small cooperative games, ground-truth credit can be computed exactly by enumerating all coalitions and joint actions. I use this to audit value-decomposition methods (VDN, QMIX) and Shapley-based credit against exact Shapley, Banzhaf and leave-one-out values, across a controlled synergy parameter that interpolates between additive and strongly non-additive team rewards. A central question is whether the choice of counterfactual baseline (what agents outside a coalition are assumed to do) changes the resulting credit more than the choice of solution concept. The project is still ongoing.
 """
 
+[[extra.timeline]]
+title = "Master's thesis: Deep Reinforcement Learning for Navigation of Active Brownian Microrobots"
+subtitle = "Supervisor: Dr. Ehsan Noruzifar"
+date = ""
+icon = "/assets/icons/researchs.svg"
+background = "#5d1467"
+foreground = "#fff"
+content = """
+This project studies navigation under stochastic noise, using classical controllers (PID and Proportional Navigation) as baselines and deep reinforcement learning (RL) as the main approach. The agents are microscale active Brownian particles in a 2D periodic arena, where thermal noise perturbs both position and heading, and the Péclet number sets how strongly noise competes with propulsion. I built a custom Gymnasium environment for this stochastic setting and tuned both controllers across noise regimes. PID holds up as noise grows, while proportional navigation breaks down at high noise because the line-of-sight rate is buried in stochastic fluctuations. I am now training a single noise-conditioned RL policy (PPO and SAC) that adapts to the noise level, aiming to outperform the classical controllers in the high-noise regime.
+"""
 
 +++

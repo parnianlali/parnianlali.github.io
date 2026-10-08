@@ -10,8 +10,7 @@
   margin: 40px auto;
   padding: 1em 0;
   list-style-type: none;
-  
-  // Clear any inherited styles
+
   &::before {
     position: absolute;
     left: 50%;
@@ -28,8 +27,8 @@
 
   li {
     padding: 1em 0;
-    overflow: hidden; // This is crucial for clearing floats
-    
+    overflow: visible; // was "hidden": it clipped the date
+
     &::after {
       content: "";
       display: block;
@@ -46,14 +45,14 @@
     position: relative;
     width: 300px;
     float: left;
-    text-align: right; // Changed from 'right' to 'left'
+    text-align: right;
   }
 
   .direction-r {
     position: relative;
     width: 300px;
     float: right;
-    text-align: left; // Keep as left align for consistency
+    text-align: left;
   }
 
   .flag-wrapper {
@@ -62,19 +61,15 @@
     text-align: center;
   }
 
-  .direction-l .flag-wrapper {
-    margin-left: -30px; // Move left-side titles more to the left
-  }
-
   .flag {
     position: relative;
-    display: inline-block; // Changed from inline to inline-block
+    display: inline-block;
     background: rgb(213, 210, 210);
     padding: 6px 10px;
     border-radius: 5px;
     font-weight: 600;
     text-align: left;
-    white-space: nowrap; // Prevent text wrapping
+    white-space: nowrap;
     font-size: 0.9em;
   }
 
@@ -98,16 +93,16 @@
     margin-top: -10px;
     background: #fff;
     border-radius: 50%;
-    border: 4px solid rgb(28, 88, 178);
+    border: 4px solid rgb(104, 17, 116);
     z-index: 10;
   }
 
   .direction-l .flag::before {
-    right: -40px; // Keep original position for left side (was correct)
+    right: -40px;
   }
 
   .direction-r .flag::before {
-    left: -40px; // Keep original position for right side (was correct)
+    left: -40px;
   }
 
   // Arrow pointers
@@ -120,7 +115,7 @@
     width: 0;
     margin-top: -8px;
     border: solid transparent;
-    border-left-color: rgb(248,248,248);
+    border-left-color: rgb(110, 40, 40);
     border-width: 8px;
     pointer-events: none;
   }
@@ -134,24 +129,18 @@
     width: 0;
     margin-top: -8px;
     border: solid transparent;
-    border-right-color: rgb(248,248,248);
+    border-right-color: rgb(110, 40, 40);
     border-width: 8px;
     pointer-events: none;
   }
 
   .time-wrapper {
-    display: inline-block; // Changed from inline to inline-block
+    display: inline-block;
     line-height: 1em;
     font-size: 0.66666em;
-    color: rgb(28, 88, 178);
+    color: rgb(140, 28, 178);
     vertical-align: middle;
     margin-left: 10px;
-  }
-
-  .direction-l .time-wrapper {
-    float: left;
-    margin-left: 14px;
-    margin-right: 5px;
   }
 
   .direction-r .time-wrapper {
@@ -170,11 +159,59 @@
     font-size: 0.77777em;
     font-style: italic;
     line-height: 1.5em;
-    clear: both; // This ensures desc starts below the flag/time
+    clear: both;
   }
 
   .direction-r .desc {
     margin: 1em 0 0 0.75em;
+  }
+
+  // Left-side descriptions start from the left edge of the column
+  .direction-l .desc {
+    text-align: left;
+    margin: 1em 0 0 0;
+  }
+
+  // Optional: neat bullet lists inside descriptions (see HTML note)
+  .desc ul {
+    margin: 0.3em 0 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .desc ul li {
+    position: relative;
+    padding: 0 0 0 1.2em;
+    overflow: visible;
+
+    &::before {
+      content: "–";
+      position: absolute;
+      left: 0;
+    }
+
+    &::after {
+      content: none; // cancel the timeline-item clearfix
+    }
+  }
+}
+
+// Desktop only: pin left-side title to the column edge (so the circle sits
+// exactly on the line) and put the date UNDER the title so it is never clipped.
+@media screen and (min-width: 661px) {
+  .mytimeline {
+    .direction-l .flag-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;   // title's right edge = column edge
+      width: 100%;
+      margin-left: 0;
+    }
+
+    .direction-l .time-wrapper {
+      float: none;
+      margin: 6px 0 0 0;
+    }
   }
 }
 
@@ -210,7 +247,7 @@
     .flag {
       background: rgb(255,255,255);
       z-index: 15;
-      white-space: normal; // Allow wrapping on mobile
+      white-space: normal;
     }
 
     .direction-l .flag::before,
