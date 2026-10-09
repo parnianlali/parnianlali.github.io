@@ -86,7 +86,7 @@ In this project, I explored wearable technologies and various types of sensors, 
 
 [[extra.timeline]]
 title = "Auditing Credit Assignment in Cooperative Multi-Agent RL (Independent Research)"
-subtitle = "With initial guidance from Dr. Farhad Fazileh"
+subtitle = "With initial guidance from the late Dr. Farhad Fazileh."
 date = ""
 icon = "/assets/icons/artificial_neural_network_icon_large.svg"
 background = "#5d1467"
