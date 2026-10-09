@@ -11,13 +11,13 @@ about_me = """
 
 
 
-**Bio**
+**Hi! 👋**
 
-I’m a student and researcher working at the intersection of artificial intelligence and other interdisciplinary fields. I’m currently pursuing an M.Sc. and have completed a bachelor in physics with a minor in Electrical Engineering. I’m particularly interested in problems where ideas from different fields come together to provide new ways of understanding complex systems.
+I’m Parnian, a student and researcher working at the intersection of artificial intelligence and other interdisciplinary fields. I’m currently pursuing an M.Sc. and have completed a bachelor in physics with a minor in Electrical Engineering, and I'm particularly passionate about learning new things and interested in problems where ideas from different fields come together to provide new ways of understanding complex systems.
 
-Outside of academia, I’m a professional violinist and a member of a classical symphony orchestra, where I perform Classical music greats. Music has always been an important part of my life, and I enjoy the combination of individual practice and collaboration that playing in an orchestra brings.
+Outside of academia, I’m a professional violinist and a member of a classical symphony orchestra, where I perform Classical music greats. Music has always been an important part of my life, and I enjoy the combination of individual practice and collaboration that playing in an orchestra brings.🎻
 
-In my free time, I enjoy being in nature, hiking, and climbing mountains.
+In my free time, I enjoy being in nature, hiking, and climbing mountains. 🏞️
 
 If you’d like to know more, have any questions, or just want to say hi, feel free to reach out ;)
 """
