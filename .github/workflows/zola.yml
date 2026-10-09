@@ -12,7 +12,7 @@ jobs:
     - name: Setup Zola
       uses: taiki-e/install-action@v2
       with:
-        tool: zola
+        tool: zola@0.18.0
     - name: Build site
       run: zola build
     - name: Deploy to GitHub Pages
