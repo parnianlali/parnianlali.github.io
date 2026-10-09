@@ -25,7 +25,8 @@
         
         <summary type="html">&lt;p&gt;In this post we will take a look at how to setup &lt;a rel=&quot;noopener nofollow noreferrer&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.collaboraonline.com&#x2F;&quot;&gt;Collabora Online&lt;&#x2F;a&gt; on
 a Nextcloud instance using NixOS, resulting in a compelling self-hosted
-alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings.&lt;&#x2F;p&gt;</summary>
+alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -45,7 +46,8 @@ alternative to Google Docs&#x2F;Sheets&#x2F;Slides&#x2F;Drawings.&lt;&#x2F;p&gt;
         <id>https://parnianlali.github.io/blog/immich-docker-to-nixos/</id>
         
         <summary type="html">&lt;p&gt;This is a quick post on how I migrated my Immich deployment from
-Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;</summary>
+Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -66,7 +68,8 @@ Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;</su
         
         <summary type="html">&lt;p&gt;This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
 This challenge takes us through the inner workings of Nix and a very interesting
-privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;</summary>
+privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
 </feed>

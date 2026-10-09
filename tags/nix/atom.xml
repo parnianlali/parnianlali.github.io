@@ -26,7 +26,8 @@
         <summary type="html">&lt;p&gt;This is a write-up of the “nix-build as a service” challenge from KalmarCTF 2025,
 a sequel to last year’s &lt;a href=&quot;&#x2F;blog&#x2F;kalmarctf-writeup-reproducible-pwning&quot;&gt;“Reproducible Pwning”&lt;&#x2F;a&gt; challenge.
 To get to the solution, we will take a peek behind the curtain into how Nix derivations
-work internally.&lt;&#x2F;p&gt;</summary>
+work internally.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
     <entry xml:lang="en">
@@ -47,7 +48,8 @@ work internally.&lt;&#x2F;p&gt;</summary>
         
         <summary type="html">&lt;p&gt;This is a write-up of the “Reproducible Pwning” challenge from KalmarCTF 2024.
 This challenge takes us through the inner workings of Nix and a very interesting
-privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;</summary>
+privilege escalation that has made me change my own NixOS configuration.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
 </feed>

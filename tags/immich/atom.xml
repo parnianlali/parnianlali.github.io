@@ -24,7 +24,8 @@
         <id>https://parnianlali.github.io/blog/immich-docker-to-nixos/</id>
         
         <summary type="html">&lt;p&gt;This is a quick post on how I migrated my Immich deployment from
-Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;</summary>
+Docker to a native NixOS module, and how you can do the same.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
 </feed>

@@ -25,7 +25,8 @@
         
         <summary type="html">&lt;p&gt;This is a write-up of the “GoSweeper” challenge from Round 2 of openECSC 2024.
 This challenge gives us a glimpse of side channels on the web, which allow
-us to infer information which we otherwise would not have access to.&lt;&#x2F;p&gt;</summary>
+us to infer information which we otherwise would not have access to.&lt;&#x2F;p&gt;
+</summary>
         
     </entry>
 </feed>
