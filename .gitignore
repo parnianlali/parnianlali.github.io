@@ -71,3 +71,6 @@ yarn-error.log
 # VSCode
 .vscode/
 public/
+
+# Zola processed images (local copy)
+static/processed_images/
