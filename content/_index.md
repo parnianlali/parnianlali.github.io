@@ -4,7 +4,7 @@ title = "Parnian Lali"
 description = "Official personal website of Parnian Lali, AI Researcher and Professional Violinist"
 
 [extra]
-profile_picture = "/assets/images/profilee2.jpg"
+profile_picture = "/assets/images/prof.png"
 name = "Parnian La'li"
 subtitle = "Student and Professional Violinist "
 about_me = """
