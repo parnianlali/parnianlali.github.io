@@ -64,6 +64,18 @@
             <div>
               {{ entry.content | striptags | markdown(inline=false) | safe }}
             </div>
+            {% if entry.result_media %}
+            <figure class="result-media">
+              {% if entry.result_media is ending_with(".html") %}
+              <iframe src="{{ entry.result_media }}" loading="lazy" title="Preliminary result"></iframe>
+              {% elif entry.result_media is ending_with(".mp4") or entry.result_media is ending_with(".webm") %}
+              <video src="{{ entry.result_media }}" autoplay loop muted playsinline controls></video>
+              {% else %}
+              <img src="{{ entry.result_media }}" alt="Preliminary result" loading="lazy" />
+              {% endif %}
+              {% if entry.result_caption %}<figcaption>{{ entry.result_caption }}</figcaption>{% endif %}
+            </figure>
+            {% endif %}
             <span class="timeline-element-date">{{ entry.date }}</span>
           </div>
         </div>

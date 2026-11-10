@@ -102,6 +102,8 @@ date = ""
 icon = "/assets/icons/researchs.svg"
 background = "#5d1467"
 foreground = "#fff"
+result_media = "/assets/animations/demo.html"
+result_caption = "Preliminary result: PID vs proportional navigation (PN) at different Péclet numbers. Not final."
 content = """
 This project studies navigation under stochastic noise, using classical controllers (PID and Proportional Navigation) as baselines and deep reinforcement learning (RL) as the main approach. The agents are microscale active Brownian particles in a 2D periodic arena, where thermal noise perturbs both position and heading, and the Péclet number sets how strongly noise competes with propulsion. I built a custom Gymnasium environment for this stochastic setting and tuned both controllers across noise regimes. PID holds up as noise grows, while proportional navigation breaks down at high noise because the line-of-sight rate is buried in stochastic fluctuations. I am now training a single noise-conditioned RL policy (PPO and SAC) that adapts to the noise level, aiming to outperform the classical controllers in the high-noise regime.
 """
