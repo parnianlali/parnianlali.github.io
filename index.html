@@ -31,7 +31,7 @@
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500|Nunito&amp;display=swap" rel="stylesheet" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://parnianlali.github.io/common.css?h=5973d4556e23e9912129" />
-<link rel="stylesheet" href="https://parnianlali.github.io/homepage.css?h=dc82ff90c7b5ee57a76a" />
+<link rel="stylesheet" href="https://parnianlali.github.io/homepage.css?h=68245801e1e56935b02c" />
 <link rel="stylesheet" href="https://parnianlali.github.io/mytimeline.css?h=1c3c92f18a297a639577" /><meta name="robots" content="index, follow" />
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
@@ -224,6 +224,14 @@
               <p>This project studies navigation under stochastic noise, using classical controllers (PID and Proportional Navigation) as baselines and deep reinforcement learning (RL) as the main approach. The agents are microscale active Brownian particles in a 2D periodic arena, where thermal noise perturbs both position and heading, and the Péclet number sets how strongly noise competes with propulsion. I built a custom Gymnasium environment for this stochastic setting and tuned both controllers across noise regimes. PID holds up as noise grows, while proportional navigation breaks down at high noise because the line-of-sight rate is buried in stochastic fluctuations. I am now training a single noise-conditioned RL policy (PPO and SAC) that adapts to the noise level, aiming to outperform the classical controllers in the high-noise regime.</p>
 
             </div>
+            
+            <figure class="result-media">
+              
+              <iframe src="&#x2F;assets&#x2F;animations&#x2F;demo.html" loading="lazy" title="Preliminary result"></iframe>
+              
+              <figcaption>Preliminary result: PID vs proportional navigation (PN) at different Péclet numbers. Not final.</figcaption>
+            </figure>
+            
             <span class="timeline-element-date"></span>
           </div>
         </div>
@@ -274,6 +282,7 @@
               <p>This project asks whether credit assignment methods in cooperative multi-agent reinforcement learning actually assign correct credit, rather than just achieving high task return. In small cooperative games, ground-truth credit can be computed exactly by enumerating all coalitions and joint actions. I use this to audit value-decomposition methods (VDN, QMIX) and Shapley-based credit against exact Shapley, Banzhaf and leave-one-out values, across a controlled synergy parameter that interpolates between additive and strongly non-additive team rewards. A central question is whether the choice of counterfactual baseline (what agents outside a coalition are assumed to do) changes the resulting credit more than the choice of solution concept. The project is still ongoing.</p>
 
             </div>
+            
             <span class="timeline-element-date"></span>
           </div>
         </div>
@@ -292,6 +301,7 @@
 <a href="/assets/file/lali.pdf">View pdf</a></p>
 
             </div>
+            
             <span class="timeline-element-date"></span>
           </div>
         </div>
